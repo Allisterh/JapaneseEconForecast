@@ -1,0 +1,30 @@
+### テーマ  
+高次元時系列データを用いた日本マクロ時系列の予測
+  
+### 背景  
+* マクロデータの特徴として計測頻度が少ない(月次、四半期)一方で、計測している系列の種類は比較的多い。  
+* このことは、従来の計量経済学の手法(VARナド)を行う上での推定を困難にしている。(degrees of freedom problem, curse of dimentionality, over-parametarisation)  
+* そのため、従来の手法ではeconometrician/practitioner が少数の変数を選んでモデルを構築していた。しかし、実際の経済では多くの変数が互いに影響を与えていることや、政策決定者はモデルに含まれている変数以上の数の指標を見ている。  
+* この問題を克服するための手法が近年、計量経済学/機械学習分野で発展。代表的なものとしてLASSOとFactor model (及びその派生系)  
+* これらの手法を用いることで、実際に予測の精度が向上することが確認されている(Stock and Watson, 2002, Ludvigson and Ng, 2009, Li and Chen 2014, Callot and Kock, 2014, etc.)  
+* 日本での高次元データを利用したマクロ実証研究としては、Shibamoto(2007)のFAVARを用いた金融政策ショックの分析、飯星(2009)による金融政策の評価、早川・小林(2011)の景気動向指数の作成(Nowcasting)など。日本経済のマクロ予測を行った研究はおそらくない  
+  
+### 先行研究  
+* Stock and Watson (1999)... アメリカの100を超えるマクロデータから、共通因子を取り出してインフレ予測  
+* Zou, Hastie and Tibshirani (2006) ... PCA のfactor loadings に対してsparse性を課した (LASSOの次元削減のアイディアをfactor loadingsに応用した)SPCAを提案.  遺伝子データとシミュレーションデータから、SPCAは予測の精度を下げることなく解釈を容易にしたことを示す  
+* Callot and Kock (2014)... VARの枠組みにL1正則化を適用することで変数およびラグ数をモデルが選択. アメリカの主要なマクロ変数に対する予測をLasso, agaptive lasso, group lasso and adptive group lassoで行う. Lassoでの予測がもっともMSFEが小さい。またaLasso, agLasso\*がoracle property を持つことを証明(\*groupが正しく分類されている場合)  
+* Li and Chen (2014)... Lasso, elastic net, group lassoを用いて米の主要マクロ変数を予測。これらの手法はDFMに比べてMSFEが小さく、ENET, gLassoは変数選択が予測期間を通じて安定しており、interpretabilityも高いことを示す  
+* Nicholsen, Matteson and Bien (2017)... Lasso VARに外生変数を加えたVARXを用いることで、石油価格などの外生的なショック組み込む。米マクロデータとシミュレーションデータを用いて予測の精度の向上\*。`BigVAR` packageを作りCRANで公開. (他の研究に比べてマクロデータでの改善は小さい. ファクターモデルはsample meanとほぼ変わらず)
+
+### 手法  
+* lasso family: lasso, Adaptive lasso, group lasso, adaptive group lasso + some from NMB(2017) paper and `BigVAR` package  
+* Factor model: dynamic facotor, SPCA  
+
+### 実装  
+* lasso: `glmnet`, `grplasso`, `BigVAR` and `lars`
+* factor: `elasticnet` ?  
+
+### データ  
+SW, 早川・小林(2011)を参考に作成する  
+
+
