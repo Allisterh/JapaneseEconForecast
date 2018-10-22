@@ -14,16 +14,17 @@ for (p in 1:lagMax){
   y <- lag.xts(dat[,51], -(h-1)) # **Note: remove last (h-1) obs's when h >1 **
   y <- y[-c(1:p),]
   T1 <- floor(nrow(y)/3) # end of initialisation
+  winSize <- T1
   T2 <- 2*(floor(nrow(y)/3)) # end of lambda selection
   end<- nrow(y)
-  for (t in T1:(T2-1)){ # penalty param / lag selection
-    fitLasso <- glmnet(x[1:t],y[1:t], lambda=lambdaChoises, family = "gaussian", alpha=1)
-    predLasso <- predict.glmnet(fitLasso, coredata(x[t+1,]))
-    cv[,p] <- (predLasso - as.numeric(y[t+1,]))^2 + cv[,p]
+  for (t in 1:winSize){ # penalty param / lag selection
+    fitLasso <- glmnet(x[t:(T1+t)],y[t:(T1+t)], lambda=lambdaChoises, family = "gaussian", alpha=1)
+    predLasso <- predict.glmnet(fitLasso, coredata(x[T1+t+1,]))
+    cv[,p] <- (predLasso - as.numeric(y[T1+t+1,]))^2 + cv[,p]
     # minIdx <- which.min(predErrLassoLambda)
     # optLam <- lambdaChoises[minIdx]
   }
-  cv[,p] <- cv[,p]/(T2-T1) # adjust the difference in length of cv period 
+  cv[,p] <- cv[,p]/winSize # adjust the difference in length of cv period 
   setTxtProgressBar(pb, p)
 }
 lamIdx <- which(cv==min(cv), arr.ind = T)[1] # optimal lambda (idx)
@@ -38,9 +39,9 @@ y <- lag.xts(dat[,51], -(h-1)) # **Note: remove last (h-1) obs's when h >1 **
 y <- y[-c(1:optLag),]
 
 predErrLasso <- 0 
-for (t in T2:(end-1)){ # forecast evaluation
-  fitLasso <- glmnet(x[1:t], y[1:t], lambda=optLam,family = "gaussian", alpha=1)
-  predLasso <- predict.glmnet(fitLasso, coredata(x[t+1,]))
-  predErrLasso <- as.numeric(predLasso - as.numeric(y[t+1,]))^2 + predErrLasso
+for (t in 1:winSize){ # forecast evaluation
+  fitLasso <- glmnet(x[(T1+t):(T2+t)], y[(T1+t):(T2+t)], lambda=optLam,family = "gaussian", alpha=1)
+  predLasso <- predict.glmnet(fitLasso, coredata(x[T2+t+1,]))
+  predErrLasso <- as.numeric(predLasso - as.numeric(y[T2+t+1,]))^2 + predErrLasso
 }
-msfeLasso <- predErrLasso/(end-T2) 
+msfeLasso <- predErrLasso/winSize
