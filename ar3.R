@@ -7,9 +7,8 @@ T2 <- 2*(floor((nrow(dat)-h)/3)) # end of evaluation period for lag length
 end <- nrow(dat) - h # last observation for the last forecast (2001-02-01)
 predErrAR3<- 0
 lagLenAR3<- numeric() # track lag length for each window
-idxTracker<-0
+
 for (t in 1:winSize){
-  idxTracker<- 1+ idxTracker
   fitAR3<- ar(dat[(T1+t):(T2+t),51],method="ols", demean=F,intercept=T)
   p <- fitAR3$order
   if (p==0){
@@ -20,9 +19,9 @@ for (t in 1:winSize){
   }
   # predAR <- predict(fitAR, n.ahead=h)$pred[h]
   predErrAR3 <- (predAR3 - as.numeric(dat[t+h,51]))^2 + predErrAR3
-  lagLenAR3[idxTracker]<- fitAR3$order
+  lagLenAR3[t]<- p
 }
 msfeAR3 <- predErrAR3/winSize
 
-rm(fitAR3, end, idxTracker,predAR3,predErrAR3,t,T1,T2,winSize, beta,p)
+rm(fitAR3, end, predAR3,predErrAR3,t,T1,T2,winSize, beta,p)
 

@@ -1,4 +1,4 @@
-# baseline AR model
+# AR model
 # Case 1: allow for flexible lag structure 
 
 # THIS CODE IONLY ACCOUNTS FOR RECURSIVE FORECAST, NEED FIXING!!
