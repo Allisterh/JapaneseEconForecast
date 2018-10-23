@@ -1,5 +1,6 @@
+# lasso with lag and parameter selected by cv, rolling window
 
-# lasso -------------------------------------------------------------------
+
 library(glmnet)
 ## lambda and lag selection on cross validation (b/w period T1 n T2, lag.max=12)
 lagMax <- 12
@@ -28,8 +29,8 @@ for (p in 1:lagMax){
   setTxtProgressBar(pb, p)
 }
 lamIdx <- which(cv==min(cv), arr.ind = T)[1] # optimal lambda (idx)
-optLam <- lambdaChoises[lamIdx]
-optLag <- which(cv==min(cv), arr.ind = T)[2] # opt lag
+optLam2 <- lambdaChoises[lamIdx]
+optLag2 <- which(cv==min(cv), arr.ind = T)[2] # opt lag
 
 # Now we have selected optimal regularisation parameter and lag length based on cross valisation. 
 
@@ -44,4 +45,8 @@ for (t in 1:winSize){ # forecast evaluation
   predLasso <- predict.glmnet(fitLasso, coredata(x[T2+t+1,]))
   predErrLasso <- as.numeric(predLasso - as.numeric(y[T2+t+1,]))^2 + predErrLasso
 }
-msfeLasso <- predErrLasso/winSize
+msfeLasso2 <- predErrLasso/winSize
+
+
+rm(cv,fitLasso, pb,predLasso,x,y,end,lagMax, lambdaChoises, lamIdx, p,predErrLasso,t,T1,T2, winSize)
+

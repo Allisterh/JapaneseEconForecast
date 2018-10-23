@@ -1,5 +1,5 @@
+# lasso with lag and parameter selected by cv, expanding window
 
-# lasso -------------------------------------------------------------------
 library(glmnet)
 ## lambda and lag selection on cross validation (b/w period T1 n T2, lag.max=12)
 lagMax <- 12
@@ -44,3 +44,5 @@ for (t in T2:(end-1)){ # forecast evaluation
   predErrLasso <- as.numeric(predLasso - as.numeric(y[t+1,]))^2 + predErrLasso
 }
 msfeLasso <- predErrLasso/(end-T2) 
+
+rm(cv,fitLasso, pb,predLasso,x,y,end,lagMax, lambdaChoises, lamIdx, p,predErrLasso,t,T1,T2)
