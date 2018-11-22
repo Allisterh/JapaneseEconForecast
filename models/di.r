@@ -1,13 +1,15 @@
 
 # PCA ---------------------------------------------------------------------
 
+
 if (var==1){
   optFacs <- numeric() # keep track of the number of (static) factors
   optFacsDyn <- numeric() # track nr of dyn factors
   factorR2 <- numeric() # retained variance of X when r factors are used
-  optPs <- numeric() # keep track of the number of lags in DI forecast
   factorVARlags <- numeric()  # track number of lags in Factor VAR
 }
+optPs <- numeric() # keep track of the number of lags in DI forecast
+
 
 for (t in 1:winSize){
   # estimate factors (We dont need to estimate factors everytime since factors are the same for each variable)
@@ -20,7 +22,7 @@ for (t in 1:winSize){
     # select nr of factors based on IC by Bai & Ng (2002)
     Rmax <- 20 # max nr of factors
     IC <- numeric(Rmax) # Placeholder of IC for each r (nr of factors)
-    varianceRetained<- numeric(Rmax)
+    varianceRetained <- numeric(Rmax)
     for (r in Rmax:1){
       # eigVal <- eig$values[1:r]
       Fhat <- sqrt(T)*vec[,1:r] # estimated factor, T-by-r matrix
@@ -88,22 +90,17 @@ msfeDI <- mean(predErrDI)
 if (horizon==1){ # create placeholders inside each lists
   DIlags[[var]] <- matrix(NA, nrow=length(hChoises), ncol=winSize, 
                           dimnames = list(c(paste("h=",hChoises,sep=""))))
-  DIfactor[[var]] <- matrix(NA, nrow=length(hChoises), ncol=winSize, 
-                            dimnames = list(c(paste("h=",hChoises,sep=""))))
-  DIfactorDyn[[var]] <- matrix(NA, nrow=length(hChoises), ncol=winSize, 
-                               dimnames = list(c(paste("h=",hChoises,sep=""))))
-  DIfactorR2[[var]] <- matrix(NA, nrow=length(hChoises), ncol=winSize, 
-                               dimnames = list(c(paste("h=",hChoises,sep=""))))
 }
 DIlags[[var]][horizon,] <- optPs
-DIfactor[[var]][horizon,] <- optFacs
-DIfactorDyn[[var]][horizon,] <- optFacsDyn
-DIfactorR2[[var]][horizon,] <- factorR2
 MSFEs[[horizon]]["DI", targetVar] <- msfeDI
+if (var==1){
+  DIfactor[horizon,] <- optFacs
+  DIfactorDyn[horizon,] <- optFacsDyn
+  DIfactorR2[horizon,] <- factorR2
+}
 
-# # clear workspace
-rm(datDI, datDICand, eig,FhatVAR, fitDI, fitDICand, gamma, lags, lagsCand,
-   Lhat,reduc,reducDyn,vec,x,X,XCand,y, yHat,bic, bicCand, eta, factorVARlags, IC, ICdyn,
-   loss, lossDyn,minLoss, minLossDyn, msfeDI, N, optFac, optPs,p,
-   predDI, predErrDI, q,r,Rmax,t,T)
-if (var==length(targetVariables)) rm(Fhat, optFacs, optFacsDyn)
+# clear workspace
+if (var==1){rm(x,eig,vec,N,T ,Rmax,IC ,varianceRetained, Lhat,reduc,loss,minLoss,optFac, optFacs,factorR2,
+               FhatVAR,factorVARlags,yHat,ICdyn,q,eta,gamma,reducDyn,lossDyn,minLossDyn,optFacsDyn,r)}
+rm(predErrDI,y,bic,p,lagsCand,XCand,datDICand,fitDICand,bicCand, optPs,lags,X, datDI,fitDI,predDI,msfeDI,t)
+if (var==length(targetVariables)) rm(Fhat)
