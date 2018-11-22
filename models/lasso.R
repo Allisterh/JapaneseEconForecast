@@ -20,6 +20,7 @@ for (t in 1:winSize){
 cvScore <- apply(predErrLasso,1,mean) # MSE for each lambda in cross validation period
 
 optLam <- lambdaChoises[which.min(cvScore)]
+LASSOlambda[horizon,targetVar] <- optLam
 
 # evaluatoin
 predErrLasso <- numeric()
@@ -37,14 +38,14 @@ msfeLasso <- mean(predErrLasso)
 # interpretation
 coefTracker[coefTracker < 1e-7] <- 0
 coefTracker[coefTracker >=1e-7] <- 1 # 1 if coef is selected (non-zero)
-sparsityRatio[targetVar,horizon] <- sum(coefTracker)/length(coefTracker) # the ratio of non-zero coef
+LASSOsparsityRatio[horizon,targetVar] <- sum(coefTracker)/length(coefTracker) # the ratio of non-zero coef
 
 # Notice that the final object `LASSOcoefs` is a list of lists (main list of variables and sub-list of horizons)
 if (horizon == 1) {LASSOcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
 LASSOcoefs[[var]][[horizon]] <- coefTracker
 if (horizon == 4) {names(LASSOcoefs[[var]]) <- paste("h", hChoises, sep="")}
 
-results["LASSO", targetVar] <- msfeLasso
+MSFEs[[horizon]]["LASSO", targetVar] <- msfeLasso
 
-# rm(cv,fitLasso, pb,predLasso,x,y,end,lagMax, lambdaChoises, 
-#    lamIdx, p,predErrLasso,t)
+rm(coefTracker, fitLasso, predLasso, X, y, cvScore,lambdaChoises,msfeLasso, optLam,predErrLasso,t)
+

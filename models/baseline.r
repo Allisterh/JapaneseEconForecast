@@ -1,6 +1,5 @@
 # baseline models (samle mean and ramdom walk)
 
-
 # sample mean -------------------------------------------------------------
 
 predErrSM <- numeric()
@@ -9,7 +8,6 @@ for (t in 1:winSize){
   predErrSM[t] <- as.numeric((predSM - dat[T2+t, targetVar])^2) 
 }
 msfeSM <- mean(predErrSM)
-results["SM", targetVar] <- msfeSM
 
 
 # randomWalk --------------------------------------------------------------
@@ -20,6 +18,12 @@ for (t in 1:winSize){
   predErrRW[t] <- as.numeric((predRW - dat[T2+h+t-1,targetVar])^2) 
 }
 msfeRW <- mean(predErrRW)
-results["RW", targetVar] <- msfeRW
 
+
+# save results 
+if (var==1) {MSFEs[[horizon]] <- matrix(NA,nrow=7, ncol=length(targetVariables), 
+                                        dimnames=list(c("SM","RW","AR","VAR","LASSO", "ENET", "DI"), targetVariables))}
+MSFEs[[horizon]]["SM", targetVar] <- msfeSM
+MSFEs[[horizon]]["RW", targetVar] <- msfeRW
+# claer workspace
 rm(predErrRW, predErrSM,predRW,predSM,t, msfeSM, msfeRW)
