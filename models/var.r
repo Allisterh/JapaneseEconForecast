@@ -1,4 +1,5 @@
-# three-variable VAR with flexible lag length selected by BIC, rolling window
+# three-, or four-variable VAR with lag length selected by BIC, rolling window
+
 if (targetVar %in% c("OutputIncome_IPtotal","PriceIndicesWages_CPIlessFood", 
                      "InterestRates_overnightAvgMonth")){
   idx <- c("OutputIncome_IPtotal","PriceIndicesWages_CPIlessFood",
@@ -20,7 +21,7 @@ for (t in 1:winSize){
       set_colnames(c("y", paste(paste("X", 1:length(idx), sep=""), 
                                 paste("lag",rep(1:p,each=length(idx)),sep=""),sep="_")))
     fitVARCand<- lm(y~.-1, data=datVARlmCand[(T1+1):T2+t-1])
-    bicCand <- as.numeric(2*logLik(fitVARCand) + log(winSize)*(ncol(datVARlmCand)-1))
+    bicCand <- as.numeric(-2*logLik(fitVARCand) + log(winSize)*(ncol(datVARlmCand)-1))
     if (bicCand < bic){
       bic <- bicCand
       lagLenVAR[t] <- p
@@ -35,18 +36,14 @@ for (t in 1:winSize){
 }
 msfeVAR<- mean(predErrVAR)
 
-if (horizon==1){
-  VARlags[[var]] <- matrix(lagLenVAR, nrow=1) %>% 
-    set_rownames("h=1") 
-} else {
-  tmp <- VARlags[[var]]
-  VARlags[[var]] <- rbind(tmp, lagLenVAR) %>% 
-    set_rownames(c(rownames(tmp), paste("h=", hChoises[horizon],sep="")))
-}
 
-results["VAR",targetVar] <- msfeVAR
+# save results
+if (horizon==1){VARlags[[var]] <- matrix(NA, nrow=length(hChoises), ncol=winSize, # create a placeholder inside a list
+                                        dimnames = list(c(paste("h=",hChoises,sep=""))))}
+VARlags[[var]][horizon,] <- lagLenVAR
 
+MSFEs[[horizon]]["VAR", targetVar] <- msfeVAR
 
+# clear workspace
 rm(datVAR,datVARlm, datVARlmCand,fitVAR,fitVARCand,X,Xcand,
    bic, bicCand, idx,p, predErrVAR, predVAR, t, msfeVAR, lagLenVAR)
-if (horizon!=1) rm(tmp)

@@ -14,7 +14,7 @@ for (t in 1:winSize){
     datARlmCand <- merge.xts(datAR,XCand) %>%    # notice first row of `datARlm`
       set_colnames(c("y", paste("lag", 1:p, sep=""))) #  has same index as p+1th row of X
     fitARCand <- lm(y~.-1, data=datARlmCand[(T1+1):T2+(t-1),])
-    bicCand <- -as.numeric(2*logLik(fitARCand) + log(winSize)*(ncol(datARlmCand)-1))
+    bicCand <- -as.numeric(-2*logLik(fitARCand) + log(winSize)*(ncol(datARlmCand)-1))
     if (bicCand < bic){
       bic <- bicCand
       lagLenAR[t] <- p
@@ -30,19 +30,14 @@ for (t in 1:winSize){
 
 msfeAR <- mean(predErrAR)
 
-if (horizon==1){
-  ARlags[[var]] <- matrix(lagLenAR, nrow=1) %>% 
-    set_rownames("h=1") 
-} else {
-  tmp <- ARlags[[var]]
-  ARlags[[var]] <- rbind(tmp, lagLenAR) %>% 
-    set_rownames(c(rownames(tmp), paste("h=", hChoises[horizon],sep="")))
-}
+# save results
+if (horizon==1){ARlags[[var]] <- matrix(NA, nrow=length(hChoises), ncol=winSize, # create a placeholder inside a list
+                                         dimnames = list(c(paste("h=",hChoises,sep=""))))}
+ARlags[[var]][horizon,] <- lagLenAR
 
-results["AR",targetVar] <- msfeAR
+MSFEs[[horizon]]["AR", targetVar]<- msfeAR
 
 
 # clear workspace
 rm(datAR, datARlm, datARlmCand, fitAR,fitARCand, X, XCand,
    bic, bicCand, p, predAR, predErrAR, t, lagLenAR, msfeAR)
-if (horizon!=1) rm(tmp)
