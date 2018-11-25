@@ -9,7 +9,7 @@ if (var==1){
   factorVARlags <- numeric()  # track number of lags in Factor VAR
 }
 optPs <- numeric() # keep track of the number of lags in DI forecast
-
+predErrDI <- numeric()
 
 for (t in 1:winSize){
   # estimate factors (We dont need to estimate factors everytime since factors are the same for each variable)
@@ -58,7 +58,6 @@ for (t in 1:winSize){
   } # endif
   
   # forecasts
-  predErrDI <- numeric()
   y <- lag.xts(dat[,targetVar], k=-h) %>% 
     set_colnames("y") 
 
