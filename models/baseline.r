@@ -21,8 +21,8 @@ msfeRW <- mean(predErrRW)
 
 
 # save results 
-if (var==1) {MSFEs[[horizon]] <- matrix(NA,nrow=7, ncol=length(targetVariables), 
-                                        dimnames=list(c("SM","RW","AR","VAR","LASSO", "ENET", "DI"), targetVariables))}
+if (var==1) {MSFEs[[horizon]] <- matrix(NA,nrow=9, ncol=length(targetVariables), 
+                                        dimnames=list(c("SM","RW","AR","VAR", "DI","LASSO", "LASSO2","ENET", "gLASSO"), targetVariables))}
 MSFEs[[horizon]]["SM", targetVar] <- msfeSM
 MSFEs[[horizon]]["RW", targetVar] <- msfeRW
 # claer workspace
