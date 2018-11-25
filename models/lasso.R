@@ -8,12 +8,11 @@ y <- dat[, targetVar] %>%
 lambdaChoises <- 10^(seq(-2,0,len=100)) # lambda choices, selection on CV
 # lambdaChoises<- c(100,10,1,0.1,0.01,0.001)
 predErrLasso <- matrix(NA, nrow=length(lambdaChoises), ncol=winSize) 
-
+X <- lag.xts(dat, 1:12+h-1)
 
 for (t in 1:winSize){
-  X <- lag.xts(dat, 1:12+h-1)
   fitLasso <- glmnet(X[(12+h):T1+t-1,],y[(12+h):T1+t-1], # (p+h):T1 instead of 1:T1 bc first p obs's are missing
-                     lambda=lambdaChoises, family="gaussian", alpha=1)
+                     lambda=lambdaChoises, family="gaussian", alpha=1, standardize=F) # data is already standardised
   predLasso <- predict.glmnet(fitLasso, coredata(X[T1+t,]))
   predErrLasso[,t] <- as.numeric((predLasso - as.numeric(y[T1+t]))^2)
 }
@@ -28,7 +27,7 @@ X <- lag.xts(dat, 1:12+h-1)
 coefTracker <- matrix(NA, nrow=winSize, ncol=ncol(X)) # keep track of whether coefficiet is zero or non-zer0
 for (t in 1:winSize){
   fitLasso <- glmnet(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], lambda = optLam,
-                     family = "gaussian", alpha = 1)
+                     family = "gaussian", alpha = 1, standardize = F)
   predLasso <- predict.glmnet(fitLasso, coredata(X[T2+t,]))
   predErrLasso[t] <- as.numeric((predLasso - y[T2+t])^2)
   coefTracker[t,] <- as.numeric(fitLasso$beta)
