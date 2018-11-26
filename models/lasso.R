@@ -5,16 +5,24 @@
 y <- dat[, targetVar] %>% 
   set_colnames("y")
 lambdaChoises <- 10^(seq(-3,0,len=100)) # lambda choices, selection on CV
-# lambdaChoises<- c(100,10,1,0.1,0.01,0.001)
 predErrLasso <- matrix(NA, nrow=length(lambdaChoises), ncol=winSize) 
 X <- lag.xts(dat, 1:12+h-1)
 
-for (t in 1:winSize){
-  fitLasso <- glmnet(X[(12+h):T1+t-1,],y[(12+h):T1+t-1], # (p+h):T1 instead of 1:T1 bc first p obs's are missing
-                     lambda=lambdaChoises, family="gaussian", alpha=1, standardize=F) # data is already standardised
-  predLasso <- predict.glmnet(fitLasso, coredata(X[T1+t,]))
-  predErrLasso[,t] <- as.numeric((predLasso - as.numeric(y[T1+t]))^2)
-}
+# for (t in 1:winSize){
+#   fitLasso <- glmnet(X[(12+h):T1+t-1,],y[(12+h):T1+t-1], # (p+h):T1 instead of 1:T1 bc first p obs's are missing
+#                      lambda=lambdaChoises, family="gaussian", alpha=1, standardize=F) # data is already standardised
+#   predLasso <- predict.glmnet(fitLasso, coredata(X[T1+t,]))
+#   predErrLasso[,t] <- as.numeric((predLasso - as.numeric(y[T1+t]))^2)
+# }
+predErrLasso <- 
+  foreach(t = 1:winSize, .combine = "cbind") %dopar% {
+    fitLasso <- glmnet(X[(12+h):T1+t-1,],y[(12+h):T1+t-1], # (p+h):T1 instead of 1:T1 bc first p obs's are missing
+                       lambda=lambdaChoises, family="gaussian", alpha=1, standardize=F) # data is already standardised
+    predLasso <- predict.glmnet(fitLasso, coredata(X[T1+t,]))
+    as.numeric((predLasso - as.numeric(y[T1+t]))^2)
+  } # endforeach
+
+
 cvScore <- apply(predErrLasso,1,mean) # MSE for each lambda in cross validation period
 
 optLam <- lambdaChoises[which.min(cvScore)]
