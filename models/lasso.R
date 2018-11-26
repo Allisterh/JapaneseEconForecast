@@ -4,8 +4,7 @@
 # cross validation (b/w period T1 n T2)
 y <- dat[, targetVar] %>% 
   set_colnames("y")
-
-lambdaChoises <- 10^(seq(-2,0,len=100)) # lambda choices, selection on CV
+lambdaChoises <- 10^(seq(-3,0,len=100)) # lambda choices, selection on CV
 # lambdaChoises<- c(100,10,1,0.1,0.01,0.001)
 predErrLasso <- matrix(NA, nrow=length(lambdaChoises), ncol=winSize) 
 X <- lag.xts(dat, 1:12+h-1)
@@ -23,7 +22,6 @@ LASSOlambda[horizon,targetVar] <- optLam
 
 # evaluatoin
 predErrLasso <- numeric()
-X <- lag.xts(dat, 1:12+h-1)
 coefTracker <- matrix(NA, nrow=winSize, ncol=ncol(X)) # keep track of whether coefficiet is zero or non-zer0
 for (t in 1:winSize){
   fitLasso <- glmnet(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], lambda = optLam,

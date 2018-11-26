@@ -63,5 +63,5 @@ if (horizon == 4) {names(ENETcoefs[[var]]) <- paste("h", hChoises, sep="")}
 
 MSFEs[[horizon]]["ENET", targetVar] <- msfeEnet
 
-# rm(coefTracker, fitEnet, predEnet, X, y, cvScore,lambdaChoises,msfeEnet, optLam,predErrEnet,t)
+rm(coefTracker, fitEnet, predEnet, X, y, cvScore,alphaChoises,msfeEnet, optAlpha,predErrEnet,t,a)
 
