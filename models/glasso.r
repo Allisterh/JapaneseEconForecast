@@ -24,51 +24,56 @@ for (i in 1:12){
 y <- dat[, targetVar] %>% 
   set_colnames("y")
 X <- lag.xts(dat, 1:12+h-1)
-# lambdaChoises <- 10^(seq(-2,0,len=100)) # lambda choices, selection on CV
-lambdaChoises<- c(1,0.3,0.1,0.03,0.01,0.003,0.001)
-predErr <- matrix(NA, nrow=length(lambdaChoises), ncol=winSize) 
 
 
-pb <- txtProgressBar(0, winSize, style=3)
-tictoc::tic()
+# cross validation --------------------------------------------------------
 
-for (t in 1:winSize){ # penalty param / lag selection
-  
-  fitGLasso <- grplasso(X[(12+h):T1+t-1,],y[(12+h):T1+t-1], idx, model=LinReg(),
-                        lambda = lambdaChoises, center = F, standardize = F)
-  predGLasso <- predict(fitGLasso, newdata=X[T1+t,])
-  predErr[,t] <- as.numeric((predGLasso-as.numeric(y[t+1,]))^2)
-  setTxtProgressBar(pb,t)
-}
+lambdaChoises <- 10^(seq(-2,0,len=100))
+predErr <-  # 30min
+  foreach(t=1:winSize, .combine = "cbind", .inorder = F) %dopar% { # penalty param / lag selection
+    fitGLasso <- grplasso(X[(12+h):T1+t-1,],y[(12+h):T1+t-1], idx, model=LinReg(), # 1 min
+                          lambda = lambdaChoises, center = F, standardize = F, control = grpl.control(trace=0))
+    predGLasso <- predict(fitGLasso, newdata=X[T1+t,])
+    as.numeric((predGLasso-as.numeric(y[t+1,]))^2)
+  }
 cv <- apply(predErr,1,mean)
 optLam <- lambdaChoises[which.min(cv)]
+gLASSOlambda[horizon,targetVar] <- optLam # save optimal lambda
 
 
-lamIdx <- which(cv==min(cv), arr.ind = T)[1] # optimal lambda (idx)
-optLam <- lambdaChoises[lamIdx]
-optLag <- which(cv==min(cv), arr.ind = T)[2] # opt lag
-tictoc::toc()
+# evaluation --------------------------------------------------------------
 
-### evaluation
-# Now we have selected optimal regularisation parameter and lag length based on cross valisation. 
+predErr <- numeric()
+coefTracker <- matrix(NA, nrow=winSize, ncol=ncol(X))
 
-x <- lag.xts(dat, 1:optLag)
-x <- x[-c(1:optLag),] # trim x'NAs **Note: I have to remove last obs if h > 1 bc there's no counterpart obs for y**
-y <- lag.xts(dat[,51], -(h-1)) # **Note: remove last (h-1) obs's when h >1 **
-y <- y[-c(1:optLag),]
-idx<- rep(c(rep(1,g1), rep(2,g2-g1), rep(3,g3-g2), rep(4,g4-g3), 
-            rep(5,g5-g4), rep(6,g6-g5),rep(7,g7-g6), rep(8,g8-g7), 
-            rep(9,g9-g8), rep(10,g10-g9), rep(11,g11-g10), rep(12,g12-g11)),optLag)
-
-
-predErrGLasso <- 0 
-pb<-txtProgressBar(T2-1, end-1, style=3)
-for (t in T2:(end-1)){ # forecast evaluation
-  fitGLasso <- grplasso(x, y, idx, model=LinReg(),
-                        lambda = optLam, center = F, standardize = F)
-  predGLasso <- predict(fitGLasso, newdata=x[t+1,])
-  predErrGLasso <- as.numeric(predLasso - as.numeric(y[t+1,]))^2 + predErrGLasso
-  setTxtProgressBar(pb,t)
+eval <- foreach(t = 1:winSize) %dopar% { # forecast evaluation, 45 sec
+  fitGLasso <- grplasso(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], idx, model=LinReg(),
+                        lambda = optLam, center = F, standardize = F, control = grpl.control(trace=0))
+  predGLasso <- predict(fitGLasso, newdata=X[T2+t,])
+  err <- as.numeric(predGLasso - y[T2+t,])^2
+  coefs <- fitGLasso$coef
+  list(err, coefs)
 }
-msfeGLasso <- predErrGLasso/(end-T2) 
+predErr <- unlist(sapply(eval, function(foo) foo[1]))
+coefTracker <- matrix(unlist(sapply(eval, function(foo) foo[2])),
+                      nrow=winSize, ncol=ncol(X), byrow=T)
+
+coefTracker[abs(coefTracker) < 1e-7] <- 0
+coefTracker[abs(coefTracker) >=1e-7] <- 1 # 1 if coef is selected (non-zero)
+
+
+# save results ------------------------------------------------------------
+
+MSFEs[[horizon]]["gLASSO", targetVar] <- mean(predErr)
+gLASSOsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
+
+if (horizon == 1) {gLASSOcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
+gLASSOcoefs[[var]][[horizon]] <- coefTracker
+if (horizon == 4) {names(gLASSOcoefs[[var]]) <- paste("h", hChoises, sep="")}
+
+
+# clear workspace ---------------------------------------------------------
+rm(output, employment, sales, consumption, housing, inventory, stock, exchange,
+   interest, money,price, idxList, idx,i,j,y,X, lambdaChoises, predErr, cv,
+   optLam, coefTracker,eval)
 
