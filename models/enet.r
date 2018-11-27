@@ -49,8 +49,8 @@ for (t in 1:winSize){
 msfeEnet <- mean(predErrEnet)
 
 # interpretation
-coefTracker[coefTracker < 1e-7] <- 0
-coefTracker[coefTracker >=1e-7] <- 1 # 1 if coef is selected (non-zero)
+coefTracker[abs(coefTracker) < 1e-7] <- 0
+coefTracker[abs(coefTracker) >=1e-7] <- 1 # 1 if coef is selected (non-zero)
 ENETsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
 
 # Notice that the final object `Enetcoefs` is a list of lists (main list of variables and sub-list of horizons)
@@ -61,5 +61,5 @@ if (horizon == 4) {names(ENETcoefs[[var]]) <- paste("h", hChoises, sep="")}
 MSFEs[[horizon]]["ENET", targetVar] <- msfeEnet
 
 rm(coefTracker, fitEnet, predEnet, X, y, cvScore,alphaChoises,
-   msfeEnet, optAlpha,predErrEnet,t,a, opts)
+   msfeEnet, optAlpha,predErrEnet,t,opts, lambdaChoises)
 

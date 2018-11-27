@@ -38,9 +38,9 @@ for (t in 1:winSize){
 msfeLasso <- mean(predErrLasso)
 
 # interpretation
-coefTracker[coefTracker < 1e-7] <- 0
-coefTracker[coefTracker >=1e-7] <- 1 # 1 if coef is selected (non-zero)
-LASSO2sparsityRatio[horizon,targetVar] <- sum(coefTracker)/length(coefTracker) # the ratio of non-zero coef
+coefTracker[abs(coefTracker) < 1e-7] <- 0
+coefTracker[abs(coefTracker) >=1e-7] <- 1 # 1 if coef is selected (non-zero)
+LASSO2sparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
 
 # Notice that the final object `LASSOcoefs` is a list of lists (main list of variables and sub-list of horizons)
 if (horizon == 1) {LASSO2coefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
@@ -49,5 +49,5 @@ if (horizon == 4) {names(LASSO2coefs[[var]]) <- paste("h", hChoises, sep="")}
 
 MSFEs[[horizon]]["LASSO2", targetVar] <- msfeLasso
 
-rm(coefTracker, fitLasso, predLasso, X, y, cvScore,lambdaChoises,msfeLasso, optLam,predErrLasso,t)
+rm(coefTracker, fitLasso, predLasso, X,x, y, cvScore,lambdaChoises,msfeLasso, optLam,predErrLasso,t)
 
