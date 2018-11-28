@@ -34,7 +34,7 @@ predErr <-  # 30min
     fitGLasso <- grplasso(X[(12+h):T1+t-1,],y[(12+h):T1+t-1], idx, model=LinReg(), # 1 min
                           lambda = lambdaChoises, center = F, standardize = F, control = grpl.control(trace=0))
     predGLasso <- predict(fitGLasso, newdata=X[T1+t,])
-    as.numeric((predGLasso-as.numeric(y[t+1,]))^2)
+    as.numeric((predGLasso-as.numeric(y[T1+t,]))^2)
   }
 cv <- apply(predErr,1,mean)
 optLam <- lambdaChoises[which.min(cv)]
