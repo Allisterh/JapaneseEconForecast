@@ -19,4 +19,8 @@ ENETcoefs <- readRDS("results/ENETcoefs.rds")
 ENETalpha <- readRDS("results/ENETalpha.rds")
 ENETsparsityRatio <- readRDS("results/ENETsparsityRatio.rds")
 
+gLASSOcoefs <- readRDS("results/gLASSOcoefs") # listed by variable and horizon, each list window x horizon
+gLASSOlambda <- readRDS("results/gLASSOlambda")
+gLASSOsparsityRatio <- readRDS("results/gLASSOsparsityRatio")
+
 MSFEs <- readRDS("results/MSFEs.rds")
