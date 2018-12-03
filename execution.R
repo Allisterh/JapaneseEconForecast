@@ -60,14 +60,15 @@ gLASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 gLASSOsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-
+gLASSOnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 
 
 # model execution ---------------------------------------------------------
 
 tictoc::tic()
 pb<- txtProgressBar(0,length(hChoises)*length(targetVariables), style=3)
-for (horizon in 1:length(hChoises)){
+for (horizon in 3:length(hChoises)){
   h <- hChoises[horizon]
   # T1 <- which(index(dat)=="Jul 2008") - h # end of initialisation period
   # T2 <- which(index(dat)=="Jul 2013") - h # end of cv
@@ -142,6 +143,7 @@ saveRDS(ENETnonzero, "results/ENETnonzero.rds")
 saveRDS(gLASSOcoefs, "results/gLASSOcoefs.rds")
 saveRDS(gLASSOlambda, "results/gLASSOlambda.rds")
 saveRDS(gLASSOsparsityRatio, "results/gLASSOsparsityRatio.rds")
+saveRDS(gLASSOnonzero, "results/gLASSOnonzero.rds")
 
 saveRDS(MSFEs, "results/MSFEs.rds")
 
