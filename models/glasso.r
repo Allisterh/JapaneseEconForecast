@@ -30,7 +30,7 @@ X <- lag.xts(dat, 1:12+h-1)
 
 # lambdaChoises <- 10^(seq(3,-2,len=10))
 tictoc::tic()
-lambdaChoises <- 50:1
+lambdaChoises <- 100:1
 
 # predErr <- matrix(NA, ncol=winSize, nrow=length(lambdaChoises))
 
@@ -73,7 +73,7 @@ eval <-
   foreach(t = 1:winSize) %dopar% { # forecast evaluation, 45 sec
     fitGLasso <- grplasso(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], idx, model=LinReg(),
                           lambda = optLam, center = F, standardize = F,
-                          control = grpl.control(max.iter=1e07, tol=1e-07,trace=0))
+                          control = grpl.control(max.iter=1e07, tol=1e-10,trace=0))
     predGLasso <- predict(fitGLasso, newdata=X[T2+t,])
     err <- as.numeric(predGLasso - y[T2+t,])^2
     coefs <- fitGLasso$coef
@@ -83,13 +83,14 @@ predErr <- unlist(sapply(eval, function(foo) foo[1]))
 coefTracker <- matrix(unlist(sapply(eval, function(foo) foo[2])),
                       nrow=winSize, ncol=ncol(X), byrow=T)
 
-coefTracker[abs(coefTracker) < 1e-7] <- 0
-coefTracker[abs(coefTracker) >=1e-7] <- 1 # 1 if coef is selected (non-zero)
+coefTracker[abs(coefTracker) < 1e-10] <- 0
+coefTracker[abs(coefTracker) >=1e-10] <- 1 # 1 if coef is selected (non-zero)
 
 # save results ------------------------------------------------------------
 
 MSFEs[[horizon]]["gLASSO", targetVar] <- mean(predErr)
 gLASSOsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
+gLASSOnonzero[horizon,targetVar] <- sum(coefTracker) # the ratio of non-zero coef
 
 if (horizon == 1) {gLASSOcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
 gLASSOcoefs[[var]][[horizon]] <- coefTracker
