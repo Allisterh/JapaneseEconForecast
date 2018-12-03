@@ -33,6 +33,7 @@ winSize <- 60
 # DIfactor <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # number of factors
 # DIfactorDyn <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # nr. dynamic fac
 # DIfactorR2 <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # retained variance of X
+# DIfactorList <- list()
 # LASSOcoefs <- list() # listed by variable and horizon, each list window x horizon
 # LASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
 #                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
@@ -50,11 +51,11 @@ winSize <- 60
 #                     dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 # ENETsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
 #                             dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-# gLASSOcoefs <- list() # listed by variable and horizon, each list window x horizon
-# gLASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-#                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-# gLASSOsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-#                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+gLASSOcoefs <- list() # listed by variable and horizon, each list window x horizon
+gLASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                      dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+gLASSOsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 
 
 
@@ -63,7 +64,6 @@ winSize <- 60
 tictoc::tic()
 pb<- txtProgressBar(0,length(hChoises)*length(targetVariables), style=3)
 for (horizon in 1:length(hChoises)){
-# for (horizon in 1:1){
   h <- hChoises[horizon]
   # T1 <- which(index(dat)=="Jul 2008") - h # end of initialisation period
   # T2 <- which(index(dat)=="Jul 2013") - h # end of cv
@@ -76,10 +76,10 @@ for (horizon in 1:length(hChoises)){
     # source("models/ar.r") # 7 mins to execute
     # source("models/var.r") # 20 mins
     # source("models/di.r") # 15 mins
-    # source("models/lasso.r") # 10 mins to execute
+    # source("models/lasso.r") # 30 mins to execute
     # source("models/lasso2.r")
     # source("models/enet.r") # 20 hrs
-    # source("models/glasso.r")
+    source("models/glasso.r")
     
     setTxtProgressBar(pb, (horizon-1)*length(targetVariables)+var)
   }
@@ -92,10 +92,20 @@ names(MSFEs) <- c(paste("h", hChoises, sep=""))
 names(ARlags) <- targetVariables
 names(VARlags) <- targetVariables
 names(DIlags) <- targetVariables
+names(DIfactorList) <- c(paste("h", hChoises, sep=""))
 names(LASSOcoefs) <- targetVariables
 names(LASSO2coefs) <- targetVariables
 names(ENETcoefs) <- targetVariables
 names(gLASSOcoefs) <- targetVar
+
+
+
+# Standardise to AR -------------------------------------------------------
+
+# MSFEs$h1 <- t(apply(MSFEs$h1, 1, function(x) x*(1/MSFEs$h1["AR",])))
+# MSFEs$h3 <- t(apply(MSFEs$h3, 1, function(x) x*(1/MSFEs$h3["AR",])))
+# MSFEs$h6 <- t(apply(MSFEs$h6, 1, function(x) x*(1/MSFEs$h6["AR",])))
+# MSFEs$h12 <- t(apply(MSFEs$h12, 1, function(x) x*(1/MSFEs$h12["AR",])))
 
 
 # store results -----------------------------------------------------------
@@ -107,6 +117,7 @@ saveRDS(DIfactor, "results/DIfactor.rds")
 saveRDS(DIfactorDyn, "results/DIfactorDyn.rds")
 saveRDS(DIfactorR2, "results/DIfactorR2.rds")
 saveRDS(DIlags,"results/DIlags.rds")
+saveRDS(DIfactorList, "results/DIfactorList.rds")
 
 saveRDS(LASSOcoefs, "results/LASSOcoefs.rds")
 saveRDS(LASSOlambda, "results/LASSOlambda.rds")

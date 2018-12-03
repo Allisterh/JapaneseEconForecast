@@ -1,7 +1,6 @@
 
 # PCA ---------------------------------------------------------------------
 
-
 if (var==1){
   optFacs <- numeric() # keep track of the number of (static) factors
   optFacsDyn <- numeric() # track nr of dyn factors
@@ -38,7 +37,6 @@ for (t in 1:winSize){
     factorR2[t] <- varianceRetained[optFac]
     Fhat <- as.matrix(sqrt(T)*vec[,1:optFac]) %>% #`as.matrix` to provide names in case optFac=1
       set_colnames(paste("F",1:optFac, sep="")) # corresponding factor
-    
     # Estimate dynamic factor (Amengual & Watson, 2007)
     Lhat <- t(Fhat)%*%x / T
     FhatVAR <- VAR(Fhat, lag.max = 2, ic="SC") # assume VAR structure in factor
@@ -56,7 +54,6 @@ for (t in 1:winSize){
     }  
     optFacsDyn[t] <- which.min(ICdyn)
   } # endif
-  
   # forecasts
   y <- lag.xts(dat[,targetVar], k=-h) %>% 
     set_colnames("y") 
@@ -96,6 +93,7 @@ if (var==1){
   DIfactor[horizon,] <- optFacs
   DIfactorDyn[horizon,] <- optFacsDyn
   DIfactorR2[horizon,] <- factorR2
+  DIfactorList[[horizon]] <- Fhat
 }
 
 # clear workspace
