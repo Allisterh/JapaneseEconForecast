@@ -47,7 +47,7 @@ ENETalpha[horizon, targetVar] <- optAlpha
 
 eval <- 
   foreach(t = 1:winSize) %dopar% { 
-    fit <- glmnet(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], lambda = optLam,
+    fit <- glmnet(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], lambda = optLambda,
                        family = "gaussian", alpha = optAlpha, standardize = F, intercept=F,
                        thresh=1e-15, maxit = 1e07)
     pred <- predict.glmnet(fit, coredata(X[T2+t,]))
@@ -60,13 +60,13 @@ coefTracker <- matrix(unlist(sapply(eval, function(foo) foo[2])),
                       nrow=winSize, ncol=ncol(X), byrow=T)
 
 
-msfeEnet <- mean(predErrEnet)
+msfeEnet <- mean(predErr)
 
 # interpretation
-coefTracker[abs(coefTracker) < 1e-7] <- 0
-coefTracker[abs(coefTracker) >=1e-7] <- 1 # 1 if coef is selected (non-zero)
+coefTracker[abs(coefTracker) < 1e-10] <- 0
+coefTracker[abs(coefTracker) >=1e-10] <- 1 # 1 if coef is selected (non-zero)
 ENETsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
-
+ENETnonzero[horizon,targetVar] <- mean(coefTracker) # number of non-zero param's
 # Notice that the final object `Enetcoefs` is a list of lists (main list of variables and sub-list of horizons)
 if (horizon == 1) {ENETcoefs[[var]] <- list();ENETcv[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
 ENETcoefs[[var]][[horizon]] <- coefTracker
@@ -78,6 +78,6 @@ if (horizon == 4) {
 
 MSFEs[[horizon]]["ENET", targetVar] <- msfeEnet
 
-rm(coefTracker, X, y, cvScore,alphaChoises, 
+rm(coefTracker, X, y, cvScore,alphaChoises, predErrEnet,optLambda,
    msfeEnet, optAlpha,opts, lambdaChoises,eval)
 

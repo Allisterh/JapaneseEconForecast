@@ -52,6 +52,9 @@ winSize <- 60
 # ENETsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
 #                             dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 # ENETcv <- list() # listed by variable and horizon, each list nr-of-lambda option and nr-of-alpha
+ENETnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                         dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+
 gLASSOcoefs <- list() # listed by variable and horizon, each list window x horizon
 gLASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
@@ -133,6 +136,8 @@ saveRDS(ENETcoefs, "results/ENETcoefs.rds")
 saveRDS(ENETalpha, "results/ENETalpha.rds")
 saveRDS(ENETlambda, "results/ENETlambda.rds")
 saveRDS(ENETsparsityRatio, "results/ENETsparsityRatio.rds")
+saveRDS(ENETcv, "results/ENETcv.rds")
+saveRDS(ENETnonzero, "results/ENETnonzero.rds")
 
 saveRDS(gLASSOcoefs, "results/gLASSOcoefs.rds")
 saveRDS(gLASSOlambda, "results/gLASSOlambda.rds")
