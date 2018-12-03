@@ -51,6 +51,7 @@ winSize <- 60
 #                     dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 # ENETsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
 #                             dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+# ENETcv <- list() # listed by variable and horizon, each list nr-of-lambda option and nr-of-alpha
 gLASSOcoefs <- list() # listed by variable and horizon, each list window x horizon
 gLASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
@@ -97,6 +98,7 @@ names(DIfactorList) <- c(paste("h", hChoises, sep=""))
 names(LASSOcoefs) <- targetVariables
 names(LASSO2coefs) <- targetVariables
 names(ENETcoefs) <- targetVariables
+names(ENETcv) <- targetVariables
 names(gLASSOcoefs) <- targetVar
 
 
