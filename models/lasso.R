@@ -9,10 +9,10 @@ X <- lag.xts(dat, 1:12+h-1)
 
 predErrLasso <-
   foreach(t = 1:winSize, .combine = "cbind", .inorder = F) %dopar% {
-    fitLasso <- glmnet(X[(12+h):T1+t-1,],y[(12+h):T1+t-1], # (p+h):T1 instead of 1:T1 bc first p obs's are missing
+    fitLasso <- glmnet::glmnet(X[(12+h):T1+t-1,],y[(12+h):T1+t-1], # (p+h):T1 instead of 1:T1 bc first p obs's are missing
                        lambda=lambdaChoises, family="gaussian", alpha=1, standardize=F, intercept=F,
                        thresh=1e-15, maxit=1e07) # choose smaller thresh if nr of nonzero coef exceeds winSize
-    predLasso <- predict.glmnet(fitLasso, coredata(X[T1+t,]))
+    predLasso <- glmnet::predict.glmnet(fitLasso, zoo::coredata(X[T1+t,]))
     as.numeric((predLasso - as.numeric(y[T1+t]))^2)
   } # endforeach
 
@@ -25,10 +25,10 @@ LASSOlambda[horizon,targetVar] <- optLam
 # evaluatoin
 
 eval <- foreach(t = 1:winSize) %dopar% { 
-  fitLasso <- glmnet(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], lambda = optLam,
+  fitLasso <- glmnet::glmnet(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], lambda = optLam,
                       family = "gaussian", alpha = 1, standardize = F, intercept=F,
                       thresh=1e-15, maxit = 1e07)
-  predLasso <- predict.glmnet(fitLasso, coredata(X[T2+t,]))
+  predLasso <- glmnet::predict.glmnet(fitLasso, zoo::coredata(X[T2+t,]))
   err <- as.numeric((predLasso - y[T2+t])^2)
   coefs <- as.numeric(fitLasso$beta)
   list(err, coefs)
