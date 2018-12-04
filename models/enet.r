@@ -5,12 +5,15 @@
 y <- dat[, targetVar] %>% 
   set_colnames("y")
 
-lambdaChoises <- 10^(seq(0,-3,len=100)) # lambda choices (or use the optLam from LASSO to reduce time)
+lambdaChoises <- 10^(seq(1,-3,len=100)) # lambda choices (or use the optLam from LASSO to reduce time)
 # lambdaChoises <- LASSOlambda[horizon,var]
-alphaChoises <- seq(0.01, 0.99, 0.07) 
+alphaChoises <- seq(0.01, 0.99, 0.01) 
 predErrEnet <- matrix(NA, nrow=length(lambdaChoises), ncol=winSize)
 # predErrEnet <- numeric() # in case we use the same lambda as LASSO
 X <- lag.xts(dat, 1:12+h-1)
+
+# cv  ---------------------------------------------------------------------
+
 cvScore <-  # nr-of-lambda x nr-of-alpha
   foreach(a = 1:length(alphaChoises), .combine = "cbind", .inorder = F) %dopar% {
     for (t in 1:winSize){
@@ -20,30 +23,26 @@ cvScore <-  # nr-of-lambda x nr-of-alpha
       predEnet <- predict.glmnet(fitEnet, coredata(X[T1+t,]))
       predErrEnet[,t] <- as.numeric((predEnet - as.numeric(y[T1+t]))^2)
   }
-  # mean(predErrEnet) # in case we use the same lambda as LASSO
   apply(predErrEnet,1,mean) # MSE for each lambda in cross validation period (with fixed alpha)
 }
-opts <- which(cvScore==min(cvScore), arr.ind = T) # 2D-indices for optimal lambda[1] and alpha[2]
-optLambda <- lambdaChoises[opts[1]]
-optAlpha <- alphaChoises[opts[2]]
+
+# opts <- which(cvScore==min(cvScore), arr.ind = T) # 2D-indices for optimal lambda[1] and alpha[2]
+# optLambda <- lambdaChoises[opts[1]]
+# optAlpha <- alphaChoises[opts[2]]
+
+
+# cvScore <- ENETcv[[var]][[horizon]]
+
+optLambda <- lambdaChoises[which.min(apply(cvScore,1,mean))]
+optAlpha <- alphaChoises[which.min(apply(cvScore,2,mean))]
 
 ENETlambda[horizon, targetVar] <- optLambda
 ENETalpha[horizon, targetVar] <- optAlpha
 
-# Enetlambda[horizon,targetVar] <- optLam
+
+
 
 # evaluatoin
-
-# predErrEnet <- numeric()
-# coefTracker <- matrix(NA, nrow=winSize, ncol=ncol(X)) # keep track of whether coefficiet is zero or non-zer0
-# for (t in 1:winSize){
-#   fitEnet <- glmnet(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], 
-#                     lambda = LASSOlambda[horizon,var], family = "gaussian", alpha = optAlpha,
-#                     standardize=F, intercept=F, thresh=1e-15, maxit=1e07)
-#   predEnet <- predict.glmnet(fitEnet, coredata(X[T2+t,]))
-#   predErrEnet[t] <- as.numeric((predEnet - y[T2+t])^2)
-#   coefTracker[t,] <- as.numeric(fitEnet$beta)
-# }
 
 eval <- 
   foreach(t = 1:winSize) %dopar% { 
@@ -66,7 +65,7 @@ msfeEnet <- mean(predErr)
 coefTracker[abs(coefTracker) < 1e-10] <- 0
 coefTracker[abs(coefTracker) >=1e-10] <- 1 # 1 if coef is selected (non-zero)
 ENETsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
-ENETnonzero[horizon,targetVar] <- mean(coefTracker) # number of non-zero param's
+ENETnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # number of non-zero param's
 # Notice that the final object `Enetcoefs` is a list of lists (main list of variables and sub-list of horizons)
 if (horizon == 1) {ENETcoefs[[var]] <- list();ENETcv[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
 ENETcoefs[[var]][[horizon]] <- coefTracker
@@ -79,5 +78,5 @@ if (horizon == 4) {
 MSFEs[[horizon]]["ENET", targetVar] <- msfeEnet
 
 rm(coefTracker, X, y, cvScore,alphaChoises, predErrEnet,optLambda,
-   msfeEnet, optAlpha,opts, lambdaChoises,eval)
+   msfeEnet, optAlpha, lambdaChoises,eval)
 
