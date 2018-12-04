@@ -52,8 +52,8 @@ winSize <- 60
 # ENETsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
 #                             dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 # ENETcv <- list() # listed by variable and horizon, each list nr-of-lambda option and nr-of-alpha
-ENETnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                         dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+# ENETnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                         # dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 
 gLASSOcoefs <- list() # listed by variable and horizon, each list window x horizon
 gLASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
@@ -68,7 +68,7 @@ gLASSOnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
 
 tictoc::tic()
 pb<- txtProgressBar(0,length(hChoises)*length(targetVariables), style=3)
-for (horizon in 3:length(hChoises)){
+for (horizon in 1:length(hChoises)){
   h <- hChoises[horizon]
   # T1 <- which(index(dat)=="Jul 2008") - h # end of initialisation period
   # T2 <- which(index(dat)=="Jul 2013") - h # end of cv
@@ -140,10 +140,10 @@ saveRDS(ENETsparsityRatio, "results/ENETsparsityRatio.rds")
 saveRDS(ENETcv, "results/ENETcv.rds")
 saveRDS(ENETnonzero, "results/ENETnonzero.rds")
 
-saveRDS(gLASSOcoefs, "results/gLASSOcoefs.rds")
-saveRDS(gLASSOlambda, "results/gLASSOlambda.rds")
-saveRDS(gLASSOsparsityRatio, "results/gLASSOsparsityRatio.rds")
-saveRDS(gLASSOnonzero, "results/gLASSOnonzero.rds")
+saveRDS(gLASSOcoefs, "results/gLASSO/gLASSOcoefs.rds")
+saveRDS(gLASSOlambda, "results/gLASSO/gLASSOlambda.rds")
+saveRDS(gLASSOsparsityRatio, "results/gLASSO/gLASSOsparsityRatio.rds")
+saveRDS(gLASSOnonzero, "results/gLASSO/gLASSOnonzero.rds")
 
 saveRDS(MSFEs, "results/MSFEs.rds")
 
