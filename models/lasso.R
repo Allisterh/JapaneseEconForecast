@@ -56,4 +56,4 @@ if (horizon == 4) {names(LASSOcoefs[[var]]) <- paste("h", hChoises, sep="")}
 
 MSFEs[[horizon]]["LASSO", targetVar] <- msfeLasso
 
-rm(coefTracker,X, y, cvScore,lambdaChoises,msfeLasso, optLam,predErrLasso)
+rm(coefTracker,X, y, cvScore,lambdaChoises,msfeLasso, optLam,predErrLasso,eval)
