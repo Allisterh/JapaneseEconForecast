@@ -8,7 +8,8 @@ MSFEs <- list(msfe, msfe, msfe, msfe)
 names(MSFEs) <- names(MSFEs) <- c(paste("h", hChoises, sep=""))
 rm(models, msfe)
 
-# ARlags <- list() # listed by variable, each list horizon x window
+ARlags <- list() # listed by variable, each list horizon x window
+ARlagsCV <- list()
 
 # DIlags <- list()
 # DIfactor <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # number of factors

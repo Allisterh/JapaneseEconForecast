@@ -26,19 +26,19 @@ source("placeholders.r") # load placeholders to store results
 
 tictoc::tic()
 pb<- txtProgressBar(0,length(hChoises)*length(targetVariables), style=3)
-for (horizon in 1:length(hChoises)){
+for (horizon in 3:length(hChoises)){
   h <- hChoises[horizon]
   T1 <- which(index(dat)==" 7 2008") - h # end of initialisation period
   T2 <- which(index(dat)==" 7 2013") - h # end of cv
   for(var in 1:length(targetVariables)){
     targetVar <- targetVariables[var]
     
-    # source("models/ar.r") # 7 mins to execute
+    source("models/ar.r") # 7 mins to execute
     # source("models/di.r") # 15 mins
     # source("models/lasso.r") # 30 mins to execute
     # source("models/lasso2.r")
     # source("models/enet.r") # 20 hrs
-    source("models/glasso.r")
+    # source("models/glasso.r")
     
     setTxtProgressBar(pb, (horizon-1)*length(targetVariables)+var)
   }
@@ -48,6 +48,7 @@ tictoc::toc()
 
 # give names to lists -----------------------------------------------------
 names(ARlags) <- targetVariables
+names(ARlagsCV) <- targetVariables
 names(VARlags) <- targetVariables
 names(DIlags) <- targetVariables
 names(DIfactorList) <- c(paste("h", hChoises, sep=""))
