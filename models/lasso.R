@@ -17,7 +17,6 @@ predErrLasso <-
   } # endforeach
 
 cvScore <- apply(predErrLasso,1,mean) # MSE for each lambda in cross validation period
-# optLam <- mean(lamUsed[which.min(cvScore),])
 optLam <- lambdaChoises[which.min(cvScore)]
 
 
@@ -48,7 +47,7 @@ msfeLasso <- mean(predErrLasso)
 
 
 LASSOsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
-LASSOnonzero[horizon,targetVar] <- sum(coefTracker) # number of non-zero coef
+LASSOnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # avg nr of non-zero coef per window
 
 # Notice that the final object `LASSOcoefs` is a list of lists (main list of variables and sub-list of horizons)
 if (horizon == 1) {LASSOcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
