@@ -90,7 +90,7 @@ coefTracker[abs(coefTracker) >=1e-10] <- 1 # 1 if coef is selected (non-zero)
 
 MSFEs[[horizon]]["gLASSO", targetVar] <- mean(predErr)
 gLASSOsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
-gLASSOnonzero[horizon,targetVar] <- sum(coefTracker) # the ratio of non-zero coef
+gLASSOnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # avg nr of nonzero per window
 
 if (horizon == 1) {gLASSOcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
 gLASSOcoefs[[var]][[horizon]] <- coefTracker
