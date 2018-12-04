@@ -17,7 +17,7 @@ pFac[grep(paste("\\b",targetVar, "\\b", sep=""),names(X))] <- 0.1 # penalise les
 predErrLasso <- 
   foreach(t = 1:winSize, .combine = "cbind") %dopar% {
     lagAR <- ARlags[[var]][horizon,t] # get the result from AR
-    pFac[grep(targetVar, names(X))[1:lagAR]] <- 0  # pen factor = 0 if used in AR (nest AR into LASSO)
+    pFac[grep(paste("\\b",targetVar, "\\b", sep=""),names(X))[1:lagAR]] <- 0  # pen factor = 0 if used in AR (nest AR into LASSO)
     fitLasso <- glmnet::glmnet(X[(12+h):T1+t-1,],y[(12+h):T1+t-1], # (p+h):T1 instead of 1:T1 bc first p obs's are missing
                        lambda=lambdaChoises, family="gaussian", alpha=1, penalty.factor=pFac,
                        standardize=F, intercept=F, thresh=1e-15, maxit=1e07)
@@ -34,7 +34,7 @@ LASSO2lambda[horizon,targetVar] <- optLam
 
 eval <- foreach(t = 1:winSize) %dopar% { 
   lagAR <- ARlags[[var]][horizon,t]
-  pFac[grep(targetVar, names(X))[1:lagAR]] <- 0 
+  pFac[grep(paste("\\b",targetVar, "\\b", sep=""),names(X))[1:lagAR]] <- 0 
   fitLasso <- glmnet::glmnet(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], lambda = optLam,
                      family = "gaussian", alpha = 1, standardize = F, intercept=F,
                      thresh=1e-15, maxit = 1e+07, penalty.factor = pFac)
