@@ -27,23 +27,33 @@ winSize <- 60
 # create placeholders -----------------------------------------------------
 
 # MSFEs <- list() # listed by horizon, each list model x variable
+
 # ARlags <- list() # listed by variable, each list horizon x window
 # VARlags <- list()
+
 # DIlags <- list()
 # DIfactor <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # number of factors
 # DIfactorDyn <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # nr. dynamic fac
 # DIfactorR2 <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # retained variance of X
 # DIfactorList <- list()
+
 # LASSOcoefs <- list() # listed by variable and horizon, each list window x horizon
 # LASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
 #                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 # LASSOsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
 #                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+LASSOnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+
+
 # LASSO2coefs <- list() # listed by variable and horizon, each list window x horizon
 # LASSO2lambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
 #                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 # LASSO2sparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
 #                              dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+# LASSO2nonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+#                         dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+
 # ENETcoefs <- list() # listed by variable and horizon, each list window x horizon
 # ENETalpha <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
 #                     dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
@@ -55,13 +65,13 @@ winSize <- 60
 # ENETnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                          # dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 
-gLASSOcoefs <- list() # listed by variable and horizon, each list window x horizon
-gLASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                      dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-gLASSOsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-gLASSOnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+# gLASSOcoefs <- list() # listed by variable and horizon, each list window x horizon
+# gLASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+#                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+# gLASSOsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+#                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+# gLASSOnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+#                         dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 
 
 # model execution ---------------------------------------------------------
@@ -119,26 +129,26 @@ names(gLASSOcoefs) <- targetVar
 saveRDS(ARlags, "results/ARlags.rds")
 saveRDS(VARlags, "results/VARlags.rds")
 
-saveRDS(DIfactor, "results/DIfactor.rds")
-saveRDS(DIfactorDyn, "results/DIfactorDyn.rds")
-saveRDS(DIfactorR2, "results/DIfactorR2.rds")
-saveRDS(DIlags,"results/DIlags.rds")
-saveRDS(DIfactorList, "results/DIfactorList.rds")
+saveRDS(DIfactor, "results/DI/DIfactor.rds")
+saveRDS(DIfactorDyn, "results/DI/DIfactorDyn.rds")
+saveRDS(DIfactorR2, "results/DI/DIfactorR2.rds")
+saveRDS(DIlags,"results/DI/DIlags.rds")
+saveRDS(DIfactorList, "results/DI/DIfactorList.rds")
 
-saveRDS(LASSOcoefs, "results/LASSOcoefs.rds")
-saveRDS(LASSOlambda, "results/LASSOlambda.rds")
-saveRDS(LASSOsparsityRatio, "results/LASSOsparsityRatio.rds")
+saveRDS(LASSOcoefs, "results/LASSO/LASSOcoefs.rds")
+saveRDS(LASSOlambda, "results/LASSO/LASSOlambda.rds")
+saveRDS(LASSOsparsityRatio, "results/LASSO/LASSOsparsityRatio.rds")
 
-saveRDS(LASSO2coefs, "results/LASSO2coefs.rds")
-saveRDS(LASSO2lambda, "results/LASSO2lambda.rds")
-saveRDS(LASSO2sparsityRatio, "results/LASSO2sparsityRatio.rds")
+saveRDS(LASSO2coefs, "results/LASSO2/LASSO2coefs.rds")
+saveRDS(LASSO2lambda, "results/LASSO2/LASSO2lambda.rds")
+saveRDS(LASSO2sparsityRatio, "results/LASSO2/LASSO2sparsityRatio.rds")
 
-saveRDS(ENETcoefs, "results/ENETcoefs.rds")
-saveRDS(ENETalpha, "results/ENETalpha.rds")
-saveRDS(ENETlambda, "results/ENETlambda.rds")
-saveRDS(ENETsparsityRatio, "results/ENETsparsityRatio.rds")
-saveRDS(ENETcv, "results/ENETcv.rds")
-saveRDS(ENETnonzero, "results/ENETnonzero.rds")
+saveRDS(ENETcoefs, "results/ENET/ENETcoefs.rds")
+saveRDS(ENETalpha, "results/ENET/ENETalpha.rds")
+saveRDS(ENETlambda, "results/ENET/ENETlambda.rds")
+saveRDS(ENETsparsityRatio, "results/ENET/ENETsparsityRatio.rds")
+saveRDS(ENETcv, "results/ENET/ENETcv.rds")
+saveRDS(ENETnonzero, "results/ENET/ENETnonzero.rds")
 
 saveRDS(gLASSOcoefs, "results/gLASSO/gLASSOcoefs.rds")
 saveRDS(gLASSOlambda, "results/gLASSO/gLASSOlambda.rds")
