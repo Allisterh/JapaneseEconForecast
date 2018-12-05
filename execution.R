@@ -39,8 +39,8 @@ for (horizon in 1:length(hChoises)){
     # source("models/lasso2.r")
     source("models/lasso3.r")
     source("models/lasso4.r")
-    # source("models/enet.r") # 20 hrs
-    # source("models/glasso.r")
+    # source("models/enet.r") # 5 hrs (Lab)
+    # source("models/glasso.r") # 5-6hrs (iMac)
     
     setTxtProgressBar(pb, (horizon-1)*length(targetVariables)+var)
   }

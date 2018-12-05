@@ -74,5 +74,5 @@ if (horizon == 4) {
 MSFEs[[horizon]]["ENET", targetVar] <- msfeEnet
 
 rm(coefTracker, X, y, cvScore,alphaChoises, predErrEnet,optLambda,
-   msfeEnet, optAlpha, lambdaChoises,eval, opts)
+   msfeEnet, optAlpha, lambdaChoises,eval, opts, predErr)
 
