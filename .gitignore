@@ -1,4 +1,3 @@
-
 .DS_Store
 .RData
 .Rhistory
@@ -121,3 +120,4 @@ results/csv/MSFE_h6.csv
 results/csv/results.xlsx
 results/csv/~$results.xlsx
 foo.html
+.httr-oauth
