@@ -1,45 +1,43 @@
 
-# PCA ---------------------------------------------------------------------
+# DI ----------------------------------------------------------------------
 
-if (var==1){
-  optFacs <- numeric() # keep track of the number of (static) factors
-  optFacsDyn <- numeric() # track nr of dyn factors
-  factorR2 <- numeric() # retained variance of X when r factors are used
+## Two step approach using PCA. First step to estimate principal components, 
+## and the second to make a forecast using pc estimated in the first step. 
+## Notice that PCs are identical irrespective of what variable to forecast
+
+# first step (only for the first element in each horizon) -----------------
+if (var==1){ # Factors are identical for the same horizon 
   factorVARlags <- numeric()  # track number of lags in Factor VAR
-}
-optPs <- numeric() # keep track of the number of lags in DI forecast
-predErrDI <- numeric()
-
-for (t in 1:winSize){
-  # estimate factors (We dont need to estimate factors everytime since factors are the same for each variable)
-  if (var==1){ # Re-estimate factors only when x changes (i.e. when h changes)
-    x <- dat[(T1+1):T2+(t-1),]
-    eig <- eigen(x%*%t(x) / (nrow(x)*ncol(x)))
-    vec <- eig$vectors
+  datLag <- lag.xts(dat, h)
+  DIfactorList[[horizon]] <- list()
+  for (t in 1:winSize){
+    x <- datLag[T1:T2+t,] # to estimate factor structure
     N <- ncol(x)
     T <- nrow(x)
+    eig <- eigen(x%*%t(x) / (T*N))
+    vec <- eig$vectors
     # select nr of factors based on IC by Bai & Ng (2002)
     Rmax <- 20 # max nr of factors
-    IC <- numeric(Rmax) # Placeholder of IC for each r (nr of factors)
+    IC <- numeric(Rmax) # Information criteria. Each element for different r's (nr of factors)
     varianceRetained <- numeric(Rmax)
     for (r in Rmax:1){
-      # eigVal <- eig$values[1:r]
       Fhat <- sqrt(T)*vec[,1:r] # estimated factor, T-by-r matrix
       Lhat <- t(Fhat)%*%x / T # estimated factor loading (transposed), r-by-N 
       reduc <- Fhat%*%Lhat # reduced data (like predicted value)
       loss <- sum(diag(t(x-reduc)%*%(x-reduc))) / (N*T) # information loss when low-dimensionalised (b/w 0-1)
-      varianceRetained[r] <- 1- loss/((sum(diag(t(x)%*%x)))/(N*T)) # how much factors explain the variance (similar to R2)
+      varianceRetained[r] <- 1- loss/((sum(diag(t(x)%*%x)))/(N*T)) # Propotion of variance explained by factors (similar to R2)
       if (r==Rmax){minLoss <- loss} # define `loss` under maximum lag length considered (see Section 5, Bai & Ng, 2002)
       IC[r] <- loss + r*minLoss* (N+T)/(N*T) * log(min(c(N,T))) # IC that Bai&Ng refer to as PC_{p2}
     }
     optFac <- which.min(IC) # optimal number of factors
-    optFacs[t] <- optFac # keep track of nr-of-factors 
-    factorR2[t] <- varianceRetained[optFac]
+    DIfactor[horizon,t] <- optFac # keep track of nr-of-factors 
+    DIfactorR2[horizon,t] <- varianceRetained[optFac]
     Fhat <- as.matrix(sqrt(T)*vec[,1:optFac]) %>% #`as.matrix` to provide names in case optFac=1
       set_colnames(paste("F",1:optFac, sep="")) # corresponding factor
+    DIfactorList[[horizon]][[t]] <- xts(Fhat, order.by = index(x))
     # Estimate dynamic factor (Amengual & Watson, 2007)
     Lhat <- t(Fhat)%*%x / T
-    FhatVAR <- VAR(Fhat, lag.max = 2, ic="SC") # assume VAR structure in factor
+    FhatVAR <- vars::VAR(Fhat, lag.max = 2, ic="SC") # assume VAR structure in factor
     factorVARlags[t] <- FhatVAR$p  
     yHat <- x[-(1:factorVARlags[t]),] - fitted(FhatVAR) %*% Lhat # remove first p obs of `Fhat` bc no `fitted(FhatVAR)`
     T <- nrow(yHat)
@@ -52,52 +50,48 @@ for (t in 1:winSize){
       if (q==optFac) {minLossDyn <- lossDyn}
       ICdyn[q] <- lossDyn + q*minLossDyn * ((N+T)/(N*T)) * log(min(c(N,T)))
     }  
-    optFacsDyn[t] <- which.min(ICdyn)
-  } # endif
-  # forecasts
-  y <- lag.xts(dat[,targetVar], k=-h) %>% 
-    set_colnames("y") 
-
-  ## Diffusion Index: y ~ F + lag(y), lag selection by bic
-  bic<-1e10
-  for (p in 1:12){
-    lagsCand <- lag.xts(dat[,targetVar], k=1:p-1) %>% 
-      magrittr::extract((T1+1):T2+(t-1),) %>% 
-      set_colnames(c(paste("lag",1:p,sep="")))
-    XCand <- xts(cbind(Fhat,lagsCand),order.by = index(dat[(T1+1):T2+(t-1),]))
-    datDICand <- na.omit(merge.xts(y,XCand)) # Xcand is always shorer. `na.omit` adjusts data period to `(T1+1):T2+(t-1)`
-    fitDICand <- lm(y~.-1, data=datDICand) 
-    bicCand <- -2*logLik(fitDICand) + log(nrow(XCand))*ncol(XCand)
-    if (bicCand < bic){
-      bic <- bicCand
-      optPs[t]<- p
-      lags <-lagsCand
-      X <- XCand
-      datDI <- datDICand
-      fitDI <- fitDICand
-    }
+    DIfactorDyn[horizon,t] <- which.min(ICdyn)
   }
-  predDI <- predict(fitDI, newdata = X[nrow(X),])
-  predErrDI[t] <- as.numeric((predDI-dat[T2+h+t-1,targetVar])^2)
-}
-msfeDI <- mean(predErrDI)
+} # endif
 
-# save results
+# second step ----------------------------------------------------
+y <- dat[, targetVar] %>% 
+  set_colnames("y")
+
+## Diffusion Index: y ~ F + lag(y), lag selection by bic
+### fit model
+eval <-
+  foreach(t=1:winSize) %dopar% {
+    Fhat <- DIfactorList[[horizon]][[t]]
+    bic<-1e10
+    for (p in 1:12){
+      lagsCand <- lag.xts(dat[,targetVar], 1:p+h-1) %>% 
+        set_colnames(c(paste("lag",1:p,sep="")))
+      XCand <- merge.xts(Fhat,lagsCand)[index(Fhat),]
+      datCand <- merge.xts(y,XCand)[index(Fhat)] 
+      fitCand <- lm(y~.-1, data=datCand[-nrow(datCand),]) 
+      bicCand <- -2*logLik(fitCand) + log(nrow(XCand)-1)*ncol(XCand)
+      if (bicCand < bic){
+        bic <- bicCand
+        optP<- p
+        fit <- fitCand
+        datDI <- datCand
+      }
+    }
+    ### forecast
+    pred <- predict(fit, newdata = datDI[nrow(datDI),-1])
+    err <- as.numeric((pred-datDI[nrow(datDI),1])^2)
+    list(err, optP)
+  }
+predErr <- unlist(sapply(eval, function(foo) foo[1]))
 if (horizon==1){ # create placeholders inside each lists
   DIlags[[var]] <- matrix(NA, nrow=length(hChoises), ncol=winSize, 
                           dimnames = list(c(paste("h=",hChoises,sep=""))))
 }
-DIlags[[var]][horizon,] <- optPs
-MSFEs[[horizon]]["DI", targetVar] <- msfeDI
-if (var==1){
-  DIfactor[horizon,] <- optFacs
-  DIfactorDyn[horizon,] <- optFacsDyn
-  DIfactorR2[horizon,] <- factorR2
-  DIfactorList[[horizon]] <- Fhat
-}
+DIlags[[var]][horizon,] <- unlist(sapply(eval, function(foo) foo[2]))
+MSFEs[[horizon]]["DI", targetVar] <- mean(predErr)
 
 # clear workspace
-if (var==1){rm(x,eig,vec,N,T ,Rmax,IC ,varianceRetained, Lhat,reduc,loss,minLoss,optFac, optFacs,factorR2,
-               FhatVAR,factorVARlags,yHat,ICdyn,q,eta,gamma,reducDyn,lossDyn,minLossDyn,optFacsDyn,r)}
-rm(predErrDI,y,bic,p,lagsCand,XCand,datDICand,fitDICand,bicCand, optPs,lags,X, datDI,fitDI,predDI,msfeDI,t)
-if (var==length(targetVariables)) rm(Fhat)
+if (var==1){rm(x,eig,vec,N,T ,Rmax,IC ,varianceRetained, Lhat,reduc,loss,minLoss,optFac,t,
+               FhatVAR,factorVARlags,yHat,ICdyn,q,eta,gamma,reducDyn,lossDyn,minLossDyn,r,datLag,Fhat)}
+rm(y,eval, predErr)
