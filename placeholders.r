@@ -1,7 +1,7 @@
 
 # create placeholders -----------------------------------------------------
 
-models <- c("AR","DI","DILASSO","LASSO","LASSO2","LASSO3","LASSO4","ENET","gLASSO")
+models <- c("AR","DI","DILASSO","LASSO","ENET","gLASSO")
 msfe <- matrix(NA, nrow=length(models), ncol=length(targetVariables),
                dimnames = list(models, targetVariables)) # listed by horizon, each list model x variable
 MSFEs <- list(msfe, msfe, msfe, msfe)
@@ -15,7 +15,16 @@ DIlags <- list()
 DIfactor <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # number of factors
 DIfactorDyn <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # nr. dynamic fac
 DIfactorR2 <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # retained variance of X
+DIinterpret <- matrix(NA, nrow=length(hChoises), ncol=ncol(dat), dimnames=list(paste("h=",hChoises,sep=""), names(dat))) # 
 DIfactorList <- list()
+
+DILASSOcoefs <- list()
+DILASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+DILASSOsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                               dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+DILASSOnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 
 LASSOcoefs <- list() # listed by variable and horizon, each list window x horizon
 LASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
@@ -24,32 +33,6 @@ LASSOsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariab
                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 LASSOnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-
-
-LASSO2coefs <- list() # listed by variable and horizon, each list window x horizon
-LASSO2lambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                      dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-LASSO2sparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                             dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-LASSO2nonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-
-LASSO3coefs <- list() # listed by variable and horizon, each list window x horizon
-LASSO3lambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-LASSO3sparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                              dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-LASSO3nonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-
-LASSO4coefs <- list() # listed by variable and horizon, each list window x horizon
-LASSO4lambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-LASSO4sparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                              dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-LASSO4nonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-
 
 ENETcoefs <- list() # listed by variable and horizon, each list window x horizon
 ENETalpha <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
@@ -62,17 +45,6 @@ ENETcv <- list() # listed by variable and horizon, each list nr-of-lambda option
 ENETnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 
-ENET2coefs <- list() # listed by variable and horizon, each list window x horizon
-ENET2alpha <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                    dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-ENET2lambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                     dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-ENET2sparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                            dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-ENET2cv <- list() # listed by variable and horizon, each list nr-of-lambda option and nr-of-alpha
-ENET2nonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                      dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-
 gLASSOcoefs <- list() # listed by variable and horizon, each list window x horizon
 gLASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
@@ -81,10 +53,3 @@ gLASSOsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVaria
 gLASSOnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                         dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 
-gLASSO2coefs <- list() # listed by variable and horizon, each list window x horizon
-gLASSO2lambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                       dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-gLASSO2sparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                              dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
-gLASSO2nonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                        dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))

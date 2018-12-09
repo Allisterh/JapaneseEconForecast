@@ -34,8 +34,8 @@ optAlpha <- alphaChoises[opts[2]]
 # optLambda <- lambdaChoises[which.min(apply(cvScore,1,mean))]
 # optAlpha <- alphaChoises[which.min(apply(cvScore,2,mean))]
 
-ENET2lambda[horizon, targetVar] <- optLambda
-ENET2alpha[horizon, targetVar] <- optAlpha
+ENETlambda[horizon, targetVar] <- optLambda
+ENETalpha[horizon, targetVar] <- optAlpha
 
 
 # forecast evaluation -----------------------------------------------------
@@ -60,18 +60,18 @@ msfeEnet <- mean(predErr)
 # interpretation
 coefTracker[abs(coefTracker) == 0] <- 0
 coefTracker[abs(coefTracker) != 0] <- 1 # 1 if coef is selected (non-zero)
-ENET2sparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
-ENET2nonzero[horizon,targetVar] <- sum(coefTracker)/winSize # number of non-zero param's
+ENETsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
+ENETnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # number of non-zero param's
 # Notice that the final object `Enetcoefs` is a list of lists (main list of variables and sub-list of horizons)
-if (horizon == 1) {ENET2coefs[[var]] <- list();ENET2cv[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
-ENET2coefs[[var]][[horizon]] <- coefTracker
-ENET2cv[[var]][[horizon]] <- cvScore
+if (horizon == 1) {ENETcoefs[[var]] <- list();ENETcv[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
+ENETcoefs[[var]][[horizon]] <- coefTracker
+ENETcv[[var]][[horizon]] <- cvScore
 if (horizon == 4) {
-  names(ENET2coefs[[var]]) <- paste("h", hChoises, sep="")
-  names(ENET2cv[[var]]) <- paste("h", hChoises, sep="")
+  names(ENETcoefs[[var]]) <- paste("h", hChoises, sep="")
+  names(ENETcv[[var]]) <- paste("h", hChoises, sep="")
 }
 
-MSFEs[[horizon]]["ENET2", targetVar] <- msfeEnet
+MSFEs[[horizon]]["ENET", targetVar] <- msfeEnet
 
 rm(coefTracker, X, y, cvScore,alphaChoises, predErrEnet,optLambda,
    msfeEnet, optAlpha, lambdaChoises,eval, opts, predErr)

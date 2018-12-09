@@ -20,7 +20,7 @@ for (i in 1:4){
     idx <- append(idx, rep(length(idxList)*(i-1)+j, length(idxList[[j]])))
   }
 }
-
+grpIdx <- idx[1:ncol(dat)] # used later in `interpretations.r`
 y <- dat[, targetVar] %>% 
   set_colnames("y")
 X <- lag.xts(dat, 1:4+h-1)
@@ -40,7 +40,7 @@ predErr <-  # 30min
   }
 cv <- apply(predErr,1,mean)
 optLam <- lambdaChoises[which.min(cv)]
-gLASSO2lambda[horizon,targetVar] <- optLam # save optimal lambda
+gLASSOlambda[horizon,targetVar] <- optLam # save optimal lambda
 
 # evaluation --------------------------------------------------------------
 
@@ -63,13 +63,13 @@ coefTracker[abs(coefTracker) != 0] <- 1 # 1 if coef is selected (non-zero)
 
 # save results ------------------------------------------------------------
 
-MSFEs[[horizon]]["gLASSO2", targetVar] <- mean(predErr)
-gLASSO2sparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
-gLASSO2nonzero[horizon,targetVar] <- sum(coefTracker)/winSize # avg nr of nonzero per window
+MSFEs[[horizon]]["gLASSO", targetVar] <- mean(predErr)
+gLASSOsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
+gLASSOnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # avg nr of nonzero per window
 
-if (horizon == 1) {gLASSO2coefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
-gLASSO2coefs[[var]][[horizon]] <- coefTracker
-if (horizon == 4) {names(gLASSO2coefs[[var]]) <- paste("h", hChoises, sep="")}
+if (horizon == 1) {gLASSOcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
+gLASSOcoefs[[var]][[horizon]] <- coefTracker
+if (horizon == 4) {names(gLASSOcoefs[[var]]) <- paste("h", hChoises, sep="")}
 
 
 # clear workspace ---------------------------------------------------------
