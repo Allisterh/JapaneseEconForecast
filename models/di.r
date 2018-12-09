@@ -91,7 +91,33 @@ if (horizon==1){ # create placeholders inside each lists
 DIlags[[var]][horizon,] <- unlist(sapply(eval, function(foo) foo[2]))
 MSFEs[[horizon]]["DI", targetVar] <- mean(predErr)
 
+
+
+# interpret factors  ------------------------------------------------------
+## We conduct two analyses to understand the relationship between factors and macroeconomic variables in two ways.  
+## First, the first element of principal component is know to have correlate to industrial production, 
+## as Shintani (2005) points out. We see whether this holds using the whole observations available.  
+## This is not a repeated process hence in a separate file (`interpretations.r`). 
+## Second, we regress each variable onto the estimated factors to see if how mach variances can be explained by factors.  
+## The idea comes from Ludvingson & Ng (2009), but not identical in the sense that LN regressed each variable onto each factor, not all the factors.
+## This is because out method re-estimates factors at each windows, meaning that the component of each factors may differ at each window
+## and the numbers of factors are relatively large, which makes it difficult to make sense of individual factors.
+if (var==1){
+  Rsq <- 
+    foreach(t = 1:winSize, .combine = "rbind", .inorder = F) %dopar% {
+      bar <- numeric()
+      for (i in 1:ncol(dat)){
+        Fhat <- DIfactorList[[horizon]][[t]]
+        fit <- lm(datLag[index(Fhat),i]~Fhat)
+        bar[i] <- summary(fit)$r.squared
+      }
+      bar
+    }
+  DIinterpret[horizon,] <- apply(Rsq,2,mean)
+}
+
+
 # clear workspace
 if (var==1){rm(x,eig,vec,N,T ,Rmax,IC ,varianceRetained, Lhat,reduc,loss,minLoss,optFac,t,
-               FhatVAR,factorVARlags,yHat,ICdyn,q,eta,gamma,reducDyn,lossDyn,minLossDyn,r,datLag,Fhat)}
+               FhatVAR,factorVARlags,yHat,ICdyn,q,eta,gamma,reducDyn,lossDyn,minLossDyn,r,datLag,Fhat, Rsq)}
 rm(y,eval, predErr)
