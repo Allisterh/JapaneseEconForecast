@@ -30,4 +30,11 @@ gLASSOlambda <- readRDS("results/gLASSO/gLASSOlambda.rds")
 gLASSOsparsityRatio <- readRDS("results/gLASSO/gLASSOsparsityRatio.rds")
 gLASSOnonzero <- readRDS("results/gLASSO/gLASSOnonzero.rds")
 
+SCADcoefs <- readRDS("results/SCAD/SCADcoefs.rds")
+SCADlambda <- readRDS("results/SCAD/SCADlambda.rds")
+SCADsparsityRatio <- readRDS("results/SCAD/SCADsparsityRatio.rds")
+SCADnonzero <- readRDS("results/SCAD/SCADnonzero.rds")
+
+
+
 MSFEs <- readRDS("results/MSFEs.rds")

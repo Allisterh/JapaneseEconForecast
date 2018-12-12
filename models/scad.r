@@ -36,8 +36,8 @@ coefTracker <- matrix(unlist(sapply(eval, function(foo) foo[2])),
                       nrow=winSize, ncol=ncol(X)+1, byrow=T)
 coefTracker <- coefTracker[,-1] # we are not interested in intercept
 
-coefTracker[abs(coefTracker) == 0] <- 0
-coefTracker[abs(coefTracker) != 0] <- 1 # 1 if coef is selected (non-zero)
+coefTracker[coefTracker == 0] <- 0
+coefTracker[coefTracker != 0] <- 1 # 1 if coef is selected (non-zero)
 
 
 # interpretation
