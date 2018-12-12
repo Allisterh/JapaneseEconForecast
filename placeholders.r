@@ -1,7 +1,7 @@
 
 # create placeholders -----------------------------------------------------
 
-models <- c("AR","DI","DILASSO","LASSO","ENET","gLASSO")
+models <- c("AR","DI","DICV","DI4","DILASSO","LASSO","ENET","gLASSO","SCAD")
 msfe <- matrix(NA, nrow=length(models), ncol=length(targetVariables),
                dimnames = list(models, targetVariables)) # listed by horizon, each list model x variable
 MSFEs <- list(msfe, msfe, msfe, msfe)
@@ -9,7 +9,6 @@ names(MSFEs) <- names(MSFEs) <- c(paste("h", hChoises, sep=""))
 rm(models, msfe)
 
 ARlags <- list() # listed by variable, each list horizon x window
-ARlagsCV <- list()
 
 DIlags <- list()
 DIfactor <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # number of factors
@@ -17,6 +16,21 @@ DIfactorDyn <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(p
 DIfactorR2 <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # retained variance of X
 DIinterpret <- matrix(NA, nrow=length(hChoises), ncol=ncol(dat), dimnames=list(paste("h=",hChoises,sep=""), names(dat))) # 
 DIfactorList <- list()
+
+DIfulllags <- list()
+DIfullfactor <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # number of factors
+DIfullfactorDyn <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # nr. dynamic fac
+DIfullfactorR2 <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # retained variance of X
+DIfullfactorList <- list()
+
+DICVfactorList <- list()
+DICVfactorCVlist <- list()
+DICVlags <-list()
+DICVfactor <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                     dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+
+DI4lags <- list()
+DI4factorList <- list()
 
 DILASSOcoefs <- list()
 DILASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
@@ -53,3 +67,10 @@ gLASSOsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVaria
 gLASSOnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                         dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 
+SCADcoefs <- list()
+SCADlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                     dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+SCADsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                            dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+SCADnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
+                      dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))

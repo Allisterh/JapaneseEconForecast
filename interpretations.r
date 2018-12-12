@@ -61,6 +61,9 @@ for (i in 1:length(targetVariables)) {
     ggplot(aes(varID, selected, fill=grp)) +
     geom_bar(stat="identity") + 
     facet_grid(.~horizon) +
+    labs(title=paste("DILASSO:", targetVariables[i]),
+         x= "lags and factors", y="number of times varaibles are nonzero") +
+    ylim(0,60) + 
     theme(legend.position = "none") +
     ggsave(paste("results/png/DILASSO/",i,".", targetVariables[i],".png",sep="" ))
 }
@@ -80,8 +83,8 @@ for(i in 1:length(targetVariables)){
 lassoFam <- c("LASSO","ENET","GLASSO")
 lassoFamCoef <- list(LASSOcoefs, ENETcoefs, gLASSOcoefs)
 for (j in 1:3){
+  coefs <- lassoFamCoef[[j]]
   for (i in 1:length(targetVariables)){
-    coefs <- lassoFamCoef[[j]]
     as.data.frame(sapply(coefs[[i]],function(foo) foo)) %>% 
       gather(horizon, selected) %>% 
       add_column(winID=rep(1:winSize, ncol(dat)*4*4),
@@ -99,7 +102,10 @@ for (j in 1:3){
       ggplot(aes(varID, selected, fill=grp)) +
       geom_bar(stat="identity") + 
       facet_grid(.~horizon) +
-      theme(legend.position = "none") +
+      labs(title=paste(lassoFam[j], targetVariables[i], sep=": "),
+           x= "variables", y="number of times varaibles are nonzero") +
+      ylim(0,60) +
+      # theme(legend.position = "none") +
       ggsave(paste("results/png/",lassoFam[j],"/",i,".", targetVariables[i],".png",sep="" ))
   }
 }    
