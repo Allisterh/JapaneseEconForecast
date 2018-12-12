@@ -69,8 +69,8 @@ eval <-
         set_colnames(c(paste("lag",1:p,sep="")))
       XCand <- merge.xts(Fhat,lagsCand)[index(Fhat),]
       datCand <- merge.xts(y,XCand)[index(Fhat)] 
-      fitCand <- lm(y~.-1, data=datCand[-nrow(datCand),]) 
-      bicCand <- -2*logLik(fitCand) + log(nrow(XCand)-1)*ncol(XCand)
+      fitCand <- lm(y~., data=datCand[-nrow(datCand),]) 
+      bicCand <- -2*logLik(fitCand) + log(nrow(XCand)-1)*(ncol(XCand)+1) # -1 to exclude the test set and +1 to include intercept
       if (bicCand < bic){
         bic <- bicCand
         optP<- p

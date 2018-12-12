@@ -41,7 +41,7 @@ cvScore <-
     X <- na.omit(merge.xts(Fhat, yLag)[index(Fhat),]) 
     Xtrain <- X[-nrow(X),]
     fit <- glmnet(Xtrain, dat[index(Xtrain),targetVar], "gaussian", alpha=1, 
-                  lambda = lambdaChoises, standardize = F, intercept = F,
+                  lambda = lambdaChoises, standardize = F, intercept = T,
                   thresh = 1e-15, maxit=1e07)
     pred <- predict.glmnet(fit, coredata(X[nrow(X),]))
     as.numeric(pred-as.numeric(dat[index(X[nrow(X),]), targetVar]))^2
@@ -58,7 +58,7 @@ eval <-
     X <- merge.xts(yLag, Fhat)[index(Fhat),] 
     Xtrain <- X[-nrow(X),]
     fit <- glmnet(Xtrain, dat[index(Xtrain),targetVar], "gaussian", alpha=1, 
-                  lambda = optLam, standardize = F, intercept = F,
+                  lambda = optLam, standardize = F, intercept = T,
                   thresh = 1e-15, maxit=1e07)
     pred <- predict.glmnet(fit, coredata(X[nrow(X),]))
     err <- as.numeric(pred-as.numeric(dat[index(X[nrow(X),]), targetVar]))^2
@@ -68,13 +68,13 @@ eval <-
 
 predErr <- unlist(sapply(eval, function(foo) foo[1]))
 bar <- sapply(eval, function(foo) foo[2])
-coefTracker<- matrix(NA, nrow=winSize, ncol=12+20, 
+coefTracker<- matrix(NA, nrow=winSize, ncol=12+20,
                      dimnames=list(paste("Win", 1:winSize, sep=""),
                                    c(paste("lag",1:12,sep=""),paste("F",1:20,sep=""))))
 for(i in 1:winSize){coefTracker[i,1:length(bar[[i]])]<-bar[[i]]}
 
-coefTracker[abs(coefTracker) == 0] <- 0
-coefTracker[abs(coefTracker) != 0] <- 1 # 1 if coef is selected (non-zero)
+coefTracker[coefTracker == 0] <- 0
+coefTracker[coefTracker != 0] <- 1 # 1 if coef is selected (non-zero)
 
 # save results
 MSFEs[[horizon]]["DILASSO", targetVar] <- mean(predErr)

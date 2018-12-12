@@ -18,7 +18,7 @@ cvScore <-  # nr-of-lambda x nr-of-alpha
     for (t in 1:winSize){
       fitEnet <- glmnet::glmnet(X[(4+h):T1+t-1,],y[(4+h):T1+t-1], # (p+h):T1 instead of 1:T1 bc first p obs's are missing
                                 lambda=lambdaChoises, family="gaussian", alpha=alphaChoises[a],
-                                standardize=F, intercept=F, thresh=1e-15, maxit=1e07)
+                                standardize=F, intercept=T, thresh=1e-15, maxit=1e07)
       predEnet <- glmnet::predict.glmnet(fitEnet, zoo::coredata(X[T1+t,]))
       predErrEnet[,t] <- as.numeric((predEnet - as.numeric(y[T1+t]))^2)
     }
@@ -43,7 +43,7 @@ ENETalpha[horizon, targetVar] <- optAlpha
 eval <- 
   foreach(t = 1:winSize) %dopar% { 
     fit <- glmnet::glmnet(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], lambda = optLambda,
-                          family = "gaussian", alpha = optAlpha, standardize = F, intercept=F,
+                          family = "gaussian", alpha = optAlpha, standardize = F, intercept=T,
                           thresh=1e-15, maxit = 1e07)
     pred <- glmnet::predict.glmnet(fit, zoo::coredata(X[T2+t,]))
     err <- as.numeric((pred - y[T2+t])^2)
@@ -58,8 +58,8 @@ coefTracker <- matrix(unlist(sapply(eval, function(foo) foo[2])),
 msfeEnet <- mean(predErr)
 
 # interpretation
-coefTracker[abs(coefTracker) == 0] <- 0
-coefTracker[abs(coefTracker) != 0] <- 1 # 1 if coef is selected (non-zero)
+coefTracker[coefTracker == 0] <- 0
+coefTracker[coefTracker != 0] <- 1 # 1 if coef is selected (non-zero)
 ENETsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
 ENETnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # number of non-zero param's
 # Notice that the final object `Enetcoefs` is a list of lists (main list of variables and sub-list of horizons)
