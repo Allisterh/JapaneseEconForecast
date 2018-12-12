@@ -30,9 +30,4 @@ saveRDS(gLASSOlambda, "results/gLASSO/gLASSOlambda.rds")
 saveRDS(gLASSOsparsityRatio, "results/gLASSO/gLASSOsparsityRatio.rds")
 saveRDS(gLASSOnonzero, "results/gLASSO/gLASSOnonzero.rds")
 
-saveRDS(SCADcoefs, "results/SCAD/SCADcoefs.rds")
-saveRDS(SCADlambda, "results/SCAD/SCADlambda.rds")
-saveRDS(SCADsparsityRatio, "results/SCAD/SCADsparsityRatio.rds")
-saveRDS(SCADnonzero, "results/SCAD/SCADnonzero.rds")
-
 saveRDS(MSFEs, "results/MSFEs.rds")
