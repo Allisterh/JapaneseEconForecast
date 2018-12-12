@@ -1,7 +1,7 @@
 # Group lasso -------------------------------------------------------------
 
 # define groups
-output<- grep("OutputIncome_", names(dat)) 
+output<- grep("OutputIncome_", names(dat))
 employment <- grep("EmploymentHours_", names(dat))
 sales <- grep("RetailManufacturingTradeSales_", names(dat))
 consumption <- grep("Consumption_", names(dat))
@@ -20,10 +20,9 @@ for (i in 1:4){
     idx <- append(idx, rep(length(idxList)*(i-1)+j, length(idxList[[j]])))
   }
 }
-grpIdx <- idx[1:ncol(dat)] # used later in `interpretations.r`
-y <- dat[, targetVar] %>% 
+y <- dat[, targetVar] %>%
   set_colnames("y")
-X <- lag.xts(dat, 1:4+h-1)
+X <- cbind(intercept=1, lag.xts(dat, 1:4+h-1))
 
 
 # cross validation --------------------------------------------------------
@@ -32,7 +31,7 @@ lambdaChoises <- 100:1
 
 predErr <-  # 30min
   foreach(t=1:winSize, .combine = "cbind", .inorder = F) %dopar% { # penalty param
-    fitGLasso <- grplasso(X[(4+h):T1+t-1,],y[(4+h):T1+t-1], idx, model=LinReg(), 
+    fitGLasso <- grplasso(X[(4+h):T1+t-1,],y[(4+h):T1+t-1], c(NA,idx), model=LinReg(),
                           lambda = lambdaChoises, center = F, standardize = F,
                           control = grpl.control(max.iter=1e07, tol=1e-15, trace=0))
     predGLasso <- predict(fitGLasso, newdata=X[T1+t,])
@@ -46,20 +45,20 @@ gLASSOlambda[horizon,targetVar] <- optLam # save optimal lambda
 
 eval <-
   foreach(t = 1:winSize) %dopar% { # forecast evaluation, 45 sec
-    fitGLasso <- grplasso(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], idx, model=LinReg(),
+    fitGLasso <- grplasso(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], c(NA,idx), model=LinReg(),
                           lambda = optLam, center = F, standardize = F,
                           control = grpl.control(max.iter=1e07, tol=1e-10,trace=0))
     predGLasso <- predict(fitGLasso, newdata=X[T2+t,])
     err <- as.numeric(predGLasso - y[T2+t,])^2
-    coefs <- fitGLasso$coef
+    coefs <- fitGLasso$coef[-1] # remove intercept
     list(err, coefs)
   }
 predErr <- unlist(sapply(eval, function(foo) foo[1]))
 coefTracker <- matrix(unlist(sapply(eval, function(foo) foo[2])),
-                      nrow=winSize, ncol=ncol(X), byrow=T)
+                      nrow=winSize, ncol=(ncol(X)-1), byrow=T)
 
-coefTracker[abs(coefTracker) == 0] <- 0
-coefTracker[abs(coefTracker) != 0] <- 1 # 1 if coef is selected (non-zero)
+coefTracker[coefTracker == 0] <- 0
+coefTracker[coefTracker != 0] <- 1 # 1 if coef is selected (non-zero)
 
 # save results ------------------------------------------------------------
 
