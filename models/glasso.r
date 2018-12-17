@@ -68,7 +68,7 @@ gLASSOnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # avg nr of nonzero
 
 if (horizon == 1) {gLASSOcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
 gLASSOcoefs[[var]][[horizon]] <- coefTracker
-if (horizon == 4) {names(gLASSOcoefs[[var]]) <- paste("h", hChoises, sep="")}
+if (horizon == 3) {names(gLASSOcoefs[[var]]) <- paste("h", hChoises, sep="")}
 
 
 # clear workspace ---------------------------------------------------------

@@ -7,6 +7,9 @@ names(ARlags) <- varNameShort
 names(DIlags) <- varNameShort
 names(DIfactorList) <- c(paste("h", hChoises, sep=""))
 names(DICVr2) <- varNameShort
+names(DICVlags) <- varNameShort
+names(DICVfactorList) <- c(paste("h", hChoises, sep=""))
+names(DICVfactorCVlist) <- c(paste("h", hChoises, sep=""))
 names(DILASSOcoefs) <- varNameShort
 names(DILASSOr2) <- varNameShort
 names(LASSOcoefs) <- varNameShort
@@ -60,4 +63,6 @@ saveRDS(SCADcoefs, "results/SCAD/SCADcoefs.rds")
 saveRDS(SCADlambda, "results/SCAD/SCADlambda.rds")
 saveRDS(SCADsparsityRatio, "results/SCAD/SCADsparsityRatio.rds")
 saveRDS(SCADnonzero, "results/SCAD/SCADnonzero.rds")
+
+
 

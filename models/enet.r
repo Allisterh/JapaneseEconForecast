@@ -42,10 +42,10 @@ ENETalpha[horizon, targetVar] <- optAlpha
 
 eval <- 
   foreach(t = 1:winSize) %dopar% { 
-    fit <- glmnet::glmnet(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], lambda = optLambda,
+    fit <- glmnet(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], lambda = optLambda,
                           family = "gaussian", alpha = optAlpha, standardize = F, intercept=T,
                           thresh=1e-15, maxit = 1e07)
-    pred <- glmnet::predict.glmnet(fit, zoo::coredata(X[T2+t,]))
+    pred <- predict.glmnet(fit, coredata(X[T2+t,]))
     err <- as.numeric((pred - y[T2+t])^2)
     coefs <- as.numeric(fit$beta)
     list(err, coefs)
@@ -66,7 +66,7 @@ ENETnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # number of non-zero 
 if (horizon == 1) {ENETcoefs[[var]] <- list();ENETcv[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
 ENETcoefs[[var]][[horizon]] <- coefTracker
 ENETcv[[var]][[horizon]] <- cvScore
-if (horizon == 4) {
+if (horizon == 3) {
   names(ENETcoefs[[var]]) <- paste("h", hChoises, sep="")
   names(ENETcv[[var]]) <- paste("h", hChoises, sep="")
 }

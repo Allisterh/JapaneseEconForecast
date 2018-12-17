@@ -14,9 +14,9 @@ registerDoParallel(detectCores())
 library(openxlsx)
 
 
-# rm(list=ls())
+rm(list=ls())
 dat <- readRDS("data/dat.rds")
-hChoises <- c(1,3,6,12)
+hChoises <- c(1,3,12)
 targetVariables <- scan("txt/targetVariables.txt", character(), quiet=T)
 winSize <- 60
 source("placeholders.r") # load placeholders to store results
@@ -31,62 +31,60 @@ for (horizon in 1:length(hChoises)){
   T2 <- which(index(dat)==" 7 2013") - h # end of cv
   for(var in 1:length(targetVariables)){
     targetVar <- targetVariables[var]
-    # source("models/ar.r") # 7 mins to execute
-    # source("models/di.r") # 10 mins
-    source("models/dicv.r") # 3 hrs
-    # source("models/di4.r") # 6 mins
-    source("models/dilasso.r") # 1 hr
-    # source("models/lasso.r") # 1hr / 20 mins (lab)
-    # source("models/enet.r") # 5 hrs (Lab)
-    # source("models/glasso.r") # 5-6hrs (iMac)
-    # source("models/scad.r") # 10 mins
-    # source("models/laridge.r") # 1 min
+    source("models/ar.r") # 7 mins to execute
+    source("models/di.r") # 10 mins
+    source("models/dicv.r") # 3 hrs / 40 min (iMac)
+    source("models/dilasso.r") # 1 hr / 15 mins (iMac)
+    source("models/lasso.r") # 1hr / 20 mins (lab)
+    source("models/enet.r") # 3.5-4 hrs (Lab)
+    source("models/glasso.r") # 4 hrs (iMac)
+    source("models/scad.r") # 10 mins
     setTxtProgressBar(pb, (horizon-1)*length(targetVariables)+var)
   }
 }
 tictoc::toc()
+source("saveResults.r")
 
 
-# give names to lists -----------------------------------------------------
-varNameShort <- scan("txt/targetVariablesShort.txt", character(), quiet=T)
+
 
 # comparison ---------------------------------------------------------------
-
+varNameShort <- scan("txt/targetVariablesShort.txt", character(), quiet=T)
 ## standardise to AR
-MSFE2 <- lapply(1:4, function(h){
+MSFE2 <- lapply(1:3, function(h){
   t(apply(MSFEs[[h]],1, function(x) x*(1/MSFEs[[h]]["AR",]))) %>% 
     set_colnames(varNameShort)
-}) %>% set_names(c("h1","h3","h6","h12"))
+}) %>% set_names(c("h1","h3","h12"))
 
 
 ## rank models 
 
 # return model name
-MSFE3 <-lapply(1:4, function(h){
+MSFE3 <-lapply(1:3, function(h){
   sapply(1:length(varNameShort), function(x) names(sort(MSFEs[[h]][,x]))) %>% 
     set_colnames(varNameShort)
-}) %>% set_names(c("h1","h3","h6","h12"))
+}) %>% set_names(c("h1","h3","h12"))
 
 
 # return model ranking 
-MSFE4 <- lapply(1:4, function(h){
+MSFE4 <- lapply(1:3, function(h){
   sapply(1:length(varNameShort), function(x) rank(MSFEs[[h]][,x], ties.method="min")) %>% 
     set_colnames(varNameShort)
-}) %>% set_names(c("h1","h3", "h6","h12"))
+}) %>% set_names(c("h1","h3","h12"))
 
 
 ## Comparison (competition) Table, which compares the performances of models against each other 
 ## i.e., How many times does each model outperform the counterparts
 
-compTable <- lapply(1:4, function(k){ 
+compTable <- lapply(1:3, function(k){ 
   msfe <- MSFEs[[k]]
   subTable <- matrix(NA, nrow(MSFEs$h1), nrow(MSFEs$h1), 
                      dimnames = list(rownames(MSFEs$h1), rownames(MSFEs$h1)))
-  for (i in 1:length(models)) {for (j in 1:length(models)) { 
+  for (i in 1:nrow(MSFEs$h1)) {for (j in 1:nrow(MSFEs$h1)) { 
     subTable[i,j] <- sum(msfe[i,] < msfe[j,])   }}
   diag(subTable) <- NA
   return(subTable)
-}) %>% set_names(c("h1", "h3", "h6", "h12"))
+}) %>% set_names(c("h1", "h3", "h12"))
 
 saveRDS(MSFEs, "results/MSFE/MSFEs.rds")
 saveRDS(MSFE2, "results/MSFE/MSFE2.rds")

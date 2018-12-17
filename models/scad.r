@@ -49,7 +49,7 @@ SCADnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # avg nr of non-zero 
 # Notice that the final object `LASSOcoefs` is a list of lists (main list of variables and sub-list of horizons)
 if (horizon == 1) {SCADcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
 SCADcoefs[[var]][[horizon]] <- coefTracker
-if (horizon == 4) {names(SCADcoefs[[var]]) <- paste("h", hChoises, sep="")}
+if (horizon == 3) {names(SCADcoefs[[var]]) <- paste("h", hChoises, sep="")}
 
 MSFEs[[horizon]]["SCAD", targetVar] <- mean(predErr)
 

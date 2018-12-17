@@ -1,10 +1,10 @@
 
 # create placeholders -----------------------------------------------------
 
-models <- c("AR","DI","DICV","DI4","DILASSO","LASSO","ENET","gLASSO","SCAD")
+models <- c("AR","DI","DICV","DILASSO","LASSO","ENET","gLASSO","SCAD")
 msfe <- matrix(NA, nrow=length(models), ncol=length(targetVariables),
                dimnames = list(models, targetVariables)) # listed by horizon, each list model x variable
-MSFEs <- list(msfe, msfe, msfe, msfe)
+MSFEs <- list(h1=msfe, h3=msfe, h12=msfe)
 names(MSFEs) <- names(MSFEs) <- c(paste("h", hChoises, sep=""))
 rm(models, msfe)
 
