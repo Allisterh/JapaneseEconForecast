@@ -33,11 +33,11 @@ for (horizon in 1:length(hChoises)){
     targetVar <- targetVariables[var]
     # source("models/ar.r") # 7 mins to execute
     # source("models/di.r") # 10 mins
-    # source("models/dicv.r") # 2 hrs
+    source("models/dicv.r") # 3 hrs
     # source("models/di4.r") # 6 mins
-    # source("models/dilasso.r") # 2 mins
-    # source("models/lasso.r") # 1hr / 20 mins (lab) 
-    source("models/enet.r") # 5 hrs (Lab)
+    source("models/dilasso.r") # 1 hr
+    # source("models/lasso.r") # 1hr / 20 mins (lab)
+    # source("models/enet.r") # 5 hrs (Lab)
     # source("models/glasso.r") # 5-6hrs (iMac)
     # source("models/scad.r") # 10 mins
     # source("models/laridge.r") # 1 min
@@ -48,45 +48,51 @@ tictoc::toc()
 
 
 # give names to lists -----------------------------------------------------
-names(ARlags) <- targetVariables
-names(DIlags) <- targetVariables
-names(DIfactorList) <- c(paste("h", hChoises, sep=""))
-names(DILASSOcoefs) <- targetVariables
-names(LASSOcoefs) <- targetVariables
-names(ENETcoefs) <- targetVariables
-names(ENETcv) <- targetVariables
-names(gLASSOcoefs) <- targetVariables
-names(SCADcoefs) <- targetVariables
-
+varNameShort <- scan("txt/targetVariablesShort.txt", character(), quiet=T)
 
 # comparison ---------------------------------------------------------------
 
 ## standardise to AR
-MSFEs2 <- MSFEs
-MSFEs2$h1 <- t(apply(MSFEs$h1, 1, function(x) x*(1/MSFEs$h1["AR",])))
-MSFEs2$h3 <- t(apply(MSFEs$h3, 1, function(x) x*(1/MSFEs$h3["AR",])))
-MSFEs2$h6 <- t(apply(MSFEs$h6, 1, function(x) x*(1/MSFEs$h6["AR",])))
-MSFEs2$h12 <- t(apply(MSFEs$h12, 1, function(x) x*(1/MSFEs$h12["AR",])))
-
-## compare the performances of models against each other (How many times does each model outperform the counterparts)
-models <- rownames(MSFEs$h1)
-Results <- list()
-for (k in 1:4){
-  results  <- matrix(NA, length(models), length(models), dimnames = list(models, models))
-  for (i in 1:length(models)) {
-    for (j in 1:length(models)) {
-      results[i,j] <- sum(MSFEs[[k]][i,] < MSFEs[[k]][j,])
-    }
-  diag(results) <- NA
-  Results[[k]] <- results
-  }
-}
+MSFE2 <- lapply(1:4, function(h){
+  t(apply(MSFEs[[h]],1, function(x) x*(1/MSFEs[[h]]["AR",]))) %>% 
+    set_colnames(varNameShort)
+}) %>% set_names(c("h1","h3","h6","h12"))
 
 
+## rank models 
+
+# return model name
+MSFE3 <-lapply(1:4, function(h){
+  sapply(1:length(varNameShort), function(x) names(sort(MSFEs[[h]][,x]))) %>% 
+    set_colnames(varNameShort)
+}) %>% set_names(c("h1","h3","h6","h12"))
+
+
+# return model ranking 
+MSFE4 <- lapply(1:4, function(h){
+  sapply(1:length(varNameShort), function(x) rank(MSFEs[[h]][,x], ties.method="min")) %>% 
+    set_colnames(varNameShort)
+}) %>% set_names(c("h1","h3", "h6","h12"))
+
+
+## Comparison (competition) Table, which compares the performances of models against each other 
+## i.e., How many times does each model outperform the counterparts
+
+compTable <- lapply(1:4, function(k){ 
+  msfe <- MSFEs[[k]]
+  subTable <- matrix(NA, nrow(MSFEs$h1), nrow(MSFEs$h1), 
+                     dimnames = list(rownames(MSFEs$h1), rownames(MSFEs$h1)))
+  for (i in 1:length(models)) {for (j in 1:length(models)) { 
+    subTable[i,j] <- sum(msfe[i,] < msfe[j,])   }}
+  diag(subTable) <- NA
+  return(subTable)
+}) %>% set_names(c("h1", "h3", "h6", "h12"))
+
+saveRDS(MSFEs, "results/MSFE/MSFEs.rds")
+saveRDS(MSFE2, "results/MSFE/MSFE2.rds")
+saveRDS(MSFE3, "results/MSFE/MSFE3.rds")
+saveRDS(MSFE4, "results/MSFE/MSFE4.rds")
+saveRDS(compTable, "results/MSFE/compTable.rds")
 
 # save results ------------------------------------------------------------
-source("saveResults.r") # saves outputs as rds
-write.xlsx(MSFEs, "results/excel/MSFEs.xlsx", rowNames=T)
-write.xlsx(Results, "results/excel/Results.xlsx", rowNames=T,keepNA=T)
-write.xlsx(DILASSOcoefs[[15]], "results/excel/DILASSOcoefs.xlsx", rowNames=T, keepNA=T)
-
+source("saveExcels.r") # save reuslts as excel 

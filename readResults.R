@@ -8,10 +8,17 @@ DIlags <- readRDS("results/DI/DIlags.rds")
 DIfactorList <- readRDS("results/DI/DIfactorList.rds")
 DIinterpret <- readRDS("results/DI/DIinterpret.rds")
 
+DICVfactor <- readRDS("results/DICV/DICVfactor.rds")
+DICVfactorCVlist <- readRDS("results/DICV/DICVfactorCVlist.rds")
+DICVfactorList <- readRDS("results/DICV/DICVfactorList.rds")
+DICVlags <- readRDS("results/DICV/DICVlags.rds")
+DICVr2 <- readRDS("results/DICV/DICVr2.rds")
+
 DILASSOcoefs <- readRDS("results/DILASSO/DILASSOcoefs.rds")
 DILASSOlambda <- readRDS("results/DILASSO/DILASSOlambda.rds")
 DILASSOnonzero <- readRDS("results/DILASSO/DILASSOnonzero.rds")
 DILASSOsparsityRatio <- readRDS("results/DILASSO/DILASSOsparsityRatio.rds")
+DILASSOr2 <- readRDS("results/DILASSO/DILASSOr2.rds")
 
 LASSOcoefs <- readRDS("results/LASSO/LASSOcoefs.rds")
 LASSOlambda <- readRDS("results/LASSO/LASSOlambda.rds")
@@ -34,7 +41,5 @@ SCADcoefs <- readRDS("results/SCAD/SCADcoefs.rds")
 SCADlambda <- readRDS("results/SCAD/SCADlambda.rds")
 SCADsparsityRatio <- readRDS("results/SCAD/SCADsparsityRatio.rds")
 SCADnonzero <- readRDS("results/SCAD/SCADnonzero.rds")
-
-
 
 MSFEs <- readRDS("results/MSFEs.rds")

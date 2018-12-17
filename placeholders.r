@@ -17,21 +17,12 @@ DIfactorR2 <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(pa
 DIinterpret <- matrix(NA, nrow=length(hChoises), ncol=ncol(dat), dimnames=list(paste("h=",hChoises,sep=""), names(dat))) # 
 DIfactorList <- list()
 
-DIfulllags <- list()
-DIfullfactor <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # number of factors
-DIfullfactorDyn <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # nr. dynamic fac
-DIfullfactorR2 <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # retained variance of X
-DIfullfactorList <- list()
-
 DICVfactorList <- list()
 DICVfactorCVlist <- list()
 DICVlags <-list()
 DICVfactor <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                      dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 DICVr2<- list()
-
-DI4lags <- list()
-DI4factorList <- list()
 
 DILASSOcoefs <- list()
 DILASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
