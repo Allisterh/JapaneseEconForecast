@@ -28,6 +28,7 @@ DICVfactorCVlist <- list()
 DICVlags <-list()
 DICVfactor <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                      dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+DICVr2<- list()
 
 DI4lags <- list()
 DI4factorList <- list()
@@ -39,6 +40,8 @@ DILASSOsparsityRatio <- matrix(NA, nrow=length(hChoises), ncol=length(targetVari
                                dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 DILASSOnonzero <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
                         dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
+DILASSOr2 <- list()
+
 
 LASSOcoefs <- list() # listed by variable and horizon, each list window x horizon
 LASSOlambda <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
