@@ -1,3 +1,22 @@
+varNameShort <- scan("txt/targetVariablesShort.txt", character(), quiet=T)
+
+
+# give names to lists -----------------------------------------------------
+
+names(ARlags) <- varNameShort
+names(DIlags) <- varNameShort
+names(DIfactorList) <- c(paste("h", hChoises, sep=""))
+names(DICVr2) <- varNameShort
+names(DILASSOcoefs) <- varNameShort
+names(DILASSOr2) <- varNameShort
+names(LASSOcoefs) <- varNameShort
+names(ENETcoefs) <- varNameShort
+names(ENETcv) <- varNameShort
+names(gLASSOcoefs) <- varNameShort
+names(SCADcoefs) <- varNameShort
+
+
+
 saveRDS(ARlags, "results/ARlags.rds")
 
 saveRDS(DIfactor, "results/DI/DIfactor.rds")
@@ -7,18 +26,17 @@ saveRDS(DIlags,"results/DI/DIlags.rds")
 saveRDS(DIfactorList, "results/DI/DIfactorList.rds")
 saveRDS(DIinterpret, "results/DI/DIinterpret.rds")
 
-saveRDS(DI4factorList, "results/DIsup/DI4factorList.rds")
-saveRDS(DI4lags, "results/DIsup/DI4lags.rds")
-saveRDS(DICVlags, "results/DIsup/DICVlags.rds")
-saveRDS(DICVfactor, "results/DIsup/DICVfactor.rds")
-saveRDS(DICVfactorCVlist, "results/DIsup/DICVfactorCVlist.rds")
-saveRDS(DICVfactorList, "results/DIsup/DICVfactorList.rds")
-saveRDS(MSFEs, "results/DIsup/MSFEs.rds")
+saveRDS(DICVlags, "results/DICV/DICVlags.rds")
+saveRDS(DICVfactor, "results/DICV/DICVfactor.rds")
+saveRDS(DICVfactorCVlist, "results/DICV/DICVfactorCVlist.rds")
+saveRDS(DICVfactorList, "results/DICV/DICVfactorList.rds")
+saveRDS(DICVr2, "results/DICV/DICVr2.rds")
 
 saveRDS(DILASSOcoefs, "results/DILASSO/DILASSOcoefs.rds")
 saveRDS(DILASSOlambda, "results/DILASSO/DILASSOlambda.rds")
 saveRDS(DILASSOnonzero, "results/DILASSO/DILASSOnonzero.rds")
 saveRDS(DILASSOsparsityRatio, "results/DILASSO/DILASSOsparsityRatio.rds")
+saveRDS(DILASSOr2, "results/DILASSO/DILASSOr2.rds")
 
 
 saveRDS(LASSOcoefs, "results/LASSO/LASSOcoefs.rds")
@@ -43,4 +61,3 @@ saveRDS(SCADlambda, "results/SCAD/SCADlambda.rds")
 saveRDS(SCADsparsityRatio, "results/SCAD/SCADsparsityRatio.rds")
 saveRDS(SCADnonzero, "results/SCAD/SCADnonzero.rds")
 
-saveRDS(MSFEs, "results/MSFEs.rds")
