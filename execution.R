@@ -7,18 +7,17 @@ library(magrittr)
 library(tidyverse)
 library(glmnet)
 library(grplasso)
-library(ncvreg)
 library(foreach)
 library(doParallel)
 registerDoParallel(detectCores())
 library(openxlsx)
 
 
-rm(list=ls())
+rm(list=ls()) # clear workspace
 dat <- readRDS("data/dat.rds")
-hChoises <- c(1,3,12)
-targetVariables <- scan("txt/targetVariables.txt", character(), quiet=T)
-winSize <- 60
+hChoises <- c(1,3,12) # forecasting horizons
+targetVariables <- scan("txt/targetVariables.txt", character(), quiet=T) # variables to be forecasted
+winSize <- 60 # window size
 source("placeholders.r") # load placeholders to store results
 
 # model execution ---------------------------------------------------------
@@ -38,7 +37,6 @@ for (horizon in 1:length(hChoises)){
     source("models/lasso.r") # 1hr / 20 mins (lab)
     source("models/enet.r") # 3.5-4 hrs (Lab)
     source("models/glasso.r") # 4 hrs (iMac)
-    source("models/scad.r") # 10 mins
     setTxtProgressBar(pb, (horizon-1)*length(targetVariables)+var)
   }
 }
@@ -46,51 +44,25 @@ tictoc::toc()
 source("saveResults.r")
 
 
-
-
-# comparison ---------------------------------------------------------------
+# give names to list  -----------------------------------------------------
 varNameShort <- scan("txt/targetVariablesShort.txt", character(), quiet=T)
-## standardise to AR
+
+names(ARlags) <- varNameShort
+names(DIlags) <- varNameShort
+names(DICVr2) <- varNameShort
+names(DICVlags) <- varNameShort
+names(DILASSOcoefs) <- varNameShort
+names(DILASSOr2) <- varNameShort
+names(LASSOcoefs) <- varNameShort
+names(ENETcoefs) <- varNameShort
+names(gLASSOcoefs) <- varNameShort
+
+# Standardise MSFE--------------------------------------------------------
 MSFE2 <- lapply(1:3, function(h){
   t(apply(MSFEs[[h]],1, function(x) x*(1/MSFEs[[h]]["AR",]))) %>% 
     set_colnames(varNameShort)
 }) %>% set_names(c("h1","h3","h12"))
 
 
-## rank models 
-
-# return model name
-MSFE3 <-lapply(1:3, function(h){
-  sapply(1:length(varNameShort), function(x) names(sort(MSFEs[[h]][,x]))) %>% 
-    set_colnames(varNameShort)
-}) %>% set_names(c("h1","h3","h12"))
-
-
-# return model ranking 
-MSFE4 <- lapply(1:3, function(h){
-  sapply(1:length(varNameShort), function(x) rank(MSFEs[[h]][,x], ties.method="min")) %>% 
-    set_colnames(varNameShort)
-}) %>% set_names(c("h1","h3","h12"))
-
-
-## Comparison (competition) Table, which compares the performances of models against each other 
-## i.e., How many times does each model outperform the counterparts
-
-compTable <- lapply(1:3, function(k){ 
-  msfe <- MSFEs[[k]]
-  subTable <- matrix(NA, nrow(MSFEs$h1), nrow(MSFEs$h1), 
-                     dimnames = list(rownames(MSFEs$h1), rownames(MSFEs$h1)))
-  for (i in 1:nrow(MSFEs$h1)) {for (j in 1:nrow(MSFEs$h1)) { 
-    subTable[i,j] <- sum(msfe[i,] < msfe[j,])   }}
-  diag(subTable) <- NA
-  return(subTable)
-}) %>% set_names(c("h1", "h3", "h12"))
-
 saveRDS(MSFEs, "results/MSFE/MSFEs.rds")
 saveRDS(MSFE2, "results/MSFE/MSFE2.rds")
-saveRDS(MSFE3, "results/MSFE/MSFE3.rds")
-saveRDS(MSFE4, "results/MSFE/MSFE4.rds")
-saveRDS(compTable, "results/MSFE/compTable.rds")
-
-# save results ------------------------------------------------------------
-source("saveExcels.r") # save reuslts as excel 

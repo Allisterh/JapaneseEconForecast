@@ -15,14 +15,14 @@ price <- grep("PriceIndicesWages_", names(dat))
 
 idxList <- list(output, employment, sales, consumption, housing, inventory, stock, exchange, interest, money,price)
 idx <- integer()
-for (i in 1:4){
+for (i in 1:4){ # four lags
   for (j in 1:length(idxList)){
     idx <- append(idx, rep(length(idxList)*(i-1)+j, length(idxList[[j]])))
   }
 }
 y <- dat[, targetVar] %>%
   set_colnames("y")
-X <- cbind(intercept=1, lag.xts(dat, 1:4+h-1))
+X <- cbind(intercept=1, lag.xts(dat, 1:4+h-1)) # Need to add intercept manually for grplasso
 
 
 # cross validation --------------------------------------------------------
@@ -58,12 +58,11 @@ coefTracker <- matrix(unlist(sapply(eval, function(foo) foo[2])),
                       nrow=winSize, ncol=(ncol(X)-1), byrow=T)
 
 coefTracker[coefTracker == 0] <- 0
-coefTracker[coefTracker != 0] <- 1 # 1 if coef is selected (non-zero)
+coefTracker[coefTracker != 0] <- 1 # 1 if param is selected (non-zero)
 
 # save results ------------------------------------------------------------
 
 MSFEs[[horizon]]["gLASSO", targetVar] <- mean(predErr)
-gLASSOsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
 gLASSOnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # avg nr of nonzero per window
 
 if (horizon == 1) {gLASSOcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists

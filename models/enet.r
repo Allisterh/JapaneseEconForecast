@@ -13,13 +13,13 @@ X <- lag.xts(dat, 1:4+h-1)
 
 # cv  ---------------------------------------------------------------------
 
-cvScore <-  # nr-of-lambda x nr-of-alpha
+cvScore <-  # nr-of-lambda x nr-of-alpha matrix containing MSEs for corresponding row and col
   foreach(a = 1:length(alphaChoises), .combine = "cbind", .inorder = F) %dopar% {
     for (t in 1:winSize){
-      fitEnet <- glmnet::glmnet(X[(4+h):T1+t-1,],y[(4+h):T1+t-1], # (p+h):T1 instead of 1:T1 bc first p obs's are missing
+      fitEnet <- glmnet(X[(4+h):T1+t-1,],y[(4+h):T1+t-1], # (p+h):T1 instead of 1:T1 bc first p obs's are missing
                                 lambda=lambdaChoises, family="gaussian", alpha=alphaChoises[a],
                                 standardize=F, intercept=T, thresh=1e-15, maxit=1e07)
-      predEnet <- glmnet::predict.glmnet(fitEnet, zoo::coredata(X[T1+t,]))
+      predEnet <- predict.glmnet(fitEnet, coredata(X[T1+t,]))
       predErrEnet[,t] <- as.numeric((predEnet - as.numeric(y[T1+t]))^2)
     }
     apply(predErrEnet,1,mean) # MSE for each lambda in cross validation period (with fixed alpha)
@@ -29,10 +29,6 @@ cvScore <-  # nr-of-lambda x nr-of-alpha
 opts <- which(cvScore==min(cvScore), arr.ind = T) # 2D-indices for optimal lambda[1] and alpha[2]
 optLambda <- lambdaChoises[opts[1]]
 optAlpha <- alphaChoises[opts[2]]
-
-# # Alternatively, you can take the average of cv-err across lambda[alpha] options and take the minimum avg value
-# optLambda <- lambdaChoises[which.min(apply(cvScore,1,mean))]
-# optAlpha <- alphaChoises[which.min(apply(cvScore,2,mean))]
 
 ENETlambda[horizon, targetVar] <- optLambda
 ENETalpha[horizon, targetVar] <- optAlpha
@@ -59,16 +55,13 @@ msfeEnet <- mean(predErr)
 
 # interpretation
 coefTracker[coefTracker == 0] <- 0
-coefTracker[coefTracker != 0] <- 1 # 1 if coef is selected (non-zero)
-ENETsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
+coefTracker[coefTracker != 0] <- 1 # 1 if param is selected (non-zero)
 ENETnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # number of non-zero param's
 # Notice that the final object `Enetcoefs` is a list of lists (main list of variables and sub-list of horizons)
-if (horizon == 1) {ENETcoefs[[var]] <- list();ENETcv[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
+if (horizon == 1) {ENETcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
 ENETcoefs[[var]][[horizon]] <- coefTracker
-ENETcv[[var]][[horizon]] <- cvScore
 if (horizon == 3) {
   names(ENETcoefs[[var]]) <- paste("h", hChoises, sep="")
-  names(ENETcv[[var]]) <- paste("h", hChoises, sep="")
 }
 
 MSFEs[[horizon]]["ENET", targetVar] <- msfeEnet

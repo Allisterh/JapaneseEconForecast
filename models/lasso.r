@@ -38,15 +38,11 @@ coefTracker <- matrix(unlist(sapply(eval, function(foo) foo[2])),
                       nrow=winSize, ncol=ncol(X), byrow=T)
 
 coefTracker[coefTracker == 0] <- 0
-coefTracker[coefTracker != 0] <- 1 # 1 if coef is selected (non-zero)
-
+coefTracker[coefTracker != 0] <- 1 # 1 if param is selected (non-zero)
 
 msfeLasso <- mean(predErr)
 
 # interpretation
-
-
-LASSOsparsityRatio[horizon,targetVar] <- mean(coefTracker) # the ratio of non-zero coef
 LASSOnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # avg nr of non-zero coef per window
 
 # Notice that the final object `LASSOcoefs` is a list of lists (main list of variables and sub-list of horizons)

@@ -6,9 +6,9 @@ lagLenAR<- numeric() # track lag length for each window
 datAR <- dat[,targetVar]
 
 # bic for lag selection
-for (t in 1:winSize){
+for (t in 1:winSize){ # rolling window
   # select optimal lag length based on bic
-  bic<- 1e10
+  bic<- 1e10 # Initial BIC. Set ramdom large value so `bicCand < bic` is always true for the first element of loop (p=1)
   for (p in 1:12){
     XCand <- lag.xts(datAR, 1:p+h-1)
     datARlmCand <- merge.xts(datAR,XCand) %>%    # notice first row of `datARlm`

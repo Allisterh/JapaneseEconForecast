@@ -1,11 +1,8 @@
-# DI ----------------------------------------------------------------------
+# DI with number of factors selected like tuning param ------------------------
 
-## Two step approach using PCA. First step to estimate principal components, 
-## and the second to make a forecast using pc estimated in the first step. 
-## Notice that PCs are identical irrespective of what variable to forecast
 
-## In this model, we determine the number of factors based on cross validation. 
-## i.e., compare MSEs b/w T1 &T2 with differing number of factors  
+## In this model, we determine the number of factors based on h step ahead MSFE. 
+## i.e., compare MSEs of second sub-period uding differing number of factors
 
 # CV: first step (only for the first element in each horizon) -----------------
 Rmax <- 20 # max nr of factors
@@ -76,9 +73,10 @@ if (var==1){ # Factors are identical for the same horizon
 
 # second step ----------------------------------------------------
 
-### fit model
+
 eval <-
   foreach(t=1:winSize) %dopar% {
+### fit model (select lag order i.t.o. BIC)
     optFac <- DICVfactor[horizon, targetVar]
     Fhat <- DICVfactorList[[horizon]][[t]][,1:optFac]
     bic<-1e10
@@ -96,7 +94,7 @@ eval <-
         datDI <- datCand
       }
     }
-    ### forecast
+### forecast
     pred <- predict(fit, newdata = datDI[nrow(datDI),-1])
     err <- as.numeric((pred-datDI[nrow(datDI),1])^2)
     list(err, optP)
@@ -112,9 +110,9 @@ MSFEs[[horizon]]["DICV", targetVar] <- mean(predErr)
 
 # R2 by factor ------------------------------------------------------------
 datLag <- lag.xts(dat, h)
-if (horizon==1) DICVr2[[var]] <- list()
+if (horizon==1) DICVr2[[var]] <- list() # create placeholde inside the list(DICVr2)
 for (t in 1:winSize){
-  if (t==1) {DICVr2[[var]][[horizon]] <- matrix(NA, nrow=winSize, ncol=ncol(dat))}
+  if (t==1) {DICVr2[[var]][[horizon]] <- matrix(NA, nrow=winSize, ncol=ncol(dat))} # create another placeholder
   DICVr2[[var]][[horizon]][t,] <-
     foreach(i = 1:ncol(dat), .combine = "c") %dopar% {
       optFac <- DICVfactor[horizon, targetVar]

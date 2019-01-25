@@ -1,43 +1,21 @@
 
 # DILASSO ----------------------------------------------------------------------
 ## Diffusion index model using lasso to further reduce dimensions
+## After estimating twenty factors in the first step, all the twenty factors and twelve lags are included in the second step,
+## within which the lasso selects factors and lags. 
 
 
 # parameter selection -----------------------------------------------------
-# first, we need to estimate factors for period b/w t=1 and T1.
-if (var==1){
-  datLag <- lag.xts(dat, h)
-  FactorCV <-
-    foreach(t = 1:winSize) %dopar% {
-      x <- datLag[h:T1+t,] # to estimate factor structure
-      N <- ncol(x)
-      T <- nrow(x)
-      eig <- eigen(x%*%t(x) / (T*N))
-      vec <- eig$vectors
-      # select nr of factors based on IC by Bai & Ng (2002)
-      Rmax <- 20 # max nr of factors
-      IC <- numeric(Rmax) # Information criteria. Each element for different r's (nr of factors)
-      for (r in Rmax:1){
-        Fhat <- sqrt(T)*vec[,1:r] # estimated factor, T-by-r matrix
-        Lhat <- t(Fhat)%*%x / T # estimated factor loading (transposed), r-by-N
-        reduc <- Fhat%*%Lhat # reduced data (like predicted value)
-        loss <- sum(diag(t(x-reduc)%*%(x-reduc))) / (N*T) # information loss when low-dimensionalised (b/w 0-1)
-        if (r==Rmax){minLoss <- loss} # define `loss` under maximum lag length considered (see Section 5, Bai & Ng, 2002)
-        IC[r] <- loss + r*minLoss* (N+T)/(N*T) * log(min(c(N,T))) # IC that Bai&Ng refer to as PC_{p2}
-      }
-      optFac <- which.min(IC) # optimal number of factors
-      Fhat <- as.matrix(sqrt(T)*vec[,1:optFac]) %>% #`as.matrix` to provide names in case optFac=1
-        set_colnames(paste("F",1:optFac, sep=""))
-       xts(Fhat, order.by = index(x)) # corresponding factor
-    } # endforeach
-} # endif
+## First step to estimate factors up to rmax.
+## Since its the same as dicv, we use `DICVfactorCVlist`
+
 
 ## cross-validate lambda
 lambdaChoises <- 10^seq(0,-2,len=100)
 yLag <- lag.xts(dat[,targetVar], 1:12+h-1)
 cvScore <-
   foreach(t=1:winSize, .combine = "cbind", .inorder = F) %dopar% {
-    Fhat <- scale(FactorCV[[t]])
+    Fhat <- scale(DICVfactorCVlist[[horizon]][[t]])
     X <- na.omit(merge.xts(Fhat, yLag)[index(Fhat),])
     Xtrain <- X[-nrow(X),]
     fit <- glmnet(Xtrain, dat[index(Xtrain),targetVar], "gaussian", alpha=1,
@@ -54,7 +32,7 @@ DILASSOlambda[horizon, targetVar] <- optLam
 # DIfactorList <- readRDS("results/DI/DIfactorList.rds")
 eval <-
   foreach(t=1:winSize) %dopar% {
-    Fhat <- scale(DIfactorList[[horizon]][[t]])
+    Fhat <- scale(DICVfactorList[[horizon]][[t]])
     X <- merge.xts(yLag, Fhat)[index(Fhat),]
     Xtrain <- X[-nrow(X),]
     fit <- glmnet(Xtrain, dat[index(Xtrain),targetVar], "gaussian", alpha=1,
@@ -78,7 +56,6 @@ coefTracker[coefTracker != 0] <- 1 # 1 if coef is selected (non-zero)
 
 # save results
 MSFEs[[horizon]]["DILASSO", targetVar] <- mean(predErr)
-DILASSOsparsityRatio[horizon,targetVar] <- mean(coefTracker,na.rm=T) # the ratio of non-zero coef
 DILASSOnonzero[horizon,targetVar] <- sum(coefTracker,na.rm=T)/winSize # avg nr of non-zero coef per window
 if (horizon == 1) {DILASSOcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
 DILASSOcoefs[[var]][[horizon]] <- coefTracker
@@ -93,8 +70,8 @@ for (t in 1:winSize){
   if (t==1) {DILASSOr2[[var]][[horizon]] <- matrix(NA, nrow=winSize, ncol=ncol(dat))}
   DILASSOr2[[var]][[horizon]][t,] <-
     foreach(i = 1:ncol(dat), .combine = "c") %dopar% {
-      FhatAll <- DIfactorList[[horizon]][[t]]
-      FhatSelect <- DILASSOcoefs[[var]][[horizon]][t,1:ncol(FhatAll)+12]
+      FhatAll <- DICVfactorList[[horizon]][[t]]
+      FhatSelect <- DILASSOcoefs[[var]][[horizon]][t,13:32]
       Fhat <- t(apply(FhatAll, 1, function(x) x*FhatSelect))
       fit <- lm(datLag[T1:T2+t,i]~Fhat)
       r2 <- summary(fit)$r.squared
@@ -104,6 +81,4 @@ if (horizon==3) names(DILASSOr2[[var]]) <- c("h1", "h3", "h12")
 
 
 # clear workspace
-if (var==1) rm(datLag)
-rm(bar, coefTracker,cvScore,eval, yLag,i,lambdaChoises, optLam,predErr,t)
-if (var==length(targetVariables)) rm(FactorCV)
+rm(datLag, bar, coefTracker,cvScore,eval, yLag,i,lambdaChoises, optLam,predErr,t)
