@@ -30,10 +30,9 @@ for (horizon in 1:length(hChoises)){
   for(var in 1:length(targetVariables)){
     targetVar <- targetVariables[var]
     # source("models/ar.r") # 7 mins to execute
-    source("models/arcv.r") # 1.5 min
     # source("models/di.r") # 10 mins
     # source("models/dicv.r") # 3 hrs / 40 min (iMac)
-    # source("models/dilasso.r") # 1 hr / 15 mins (iMac)
+    source("models/dilasso.r") # 1 hr / 15 mins (iMac)
     # source("models/lasso.r") # 1hr / 20 mins (lab)
     # source("models/enet.r") # 3.5-4 hrs (Lab)
     # source("models/glasso.r") # 4 hrs (iMac)
@@ -59,7 +58,7 @@ names(gLASSOcoefs) <- varNameShort
 
 # Standardise MSFE--------------------------------------------------------
 MSFE2 <- lapply(1:3, function(h){
-  t(apply(MSFEs[[h]],1, function(x) x*(1/MSFEs[[h]]["ARCV",]))) %>% 
+  t(apply(MSFEs[[h]],1, function(x) x*(1/MSFEs[[h]]["AR",]))) %>% 
     set_colnames(varNameShort)
 }) %>% set_names(c("h1","h3","h12"))
 

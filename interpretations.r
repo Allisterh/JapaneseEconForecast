@@ -73,9 +73,8 @@ p2 <- ggplot(as.data.frame(DILASSOr2_avg), aes(1:127,CPI)) + # Figure 2
   geom_bar(stat="identity") +
   labs(x="varaibles", y="") 
 
-gridExtra::grid.arrange(p1,p2,nrow=1) + 
-  ggsave("results/png/r2.png")
-
+gridExtra::arrangeGrob(p1,p2, nrow=1) %>% 
+  ggsave("results/fig2.eps", .,  device = "eps")
 
 # VAR / lasso-based methods -----------------------------------------------
 ## Explore the sparcity ratio (how often the variables are selected) 

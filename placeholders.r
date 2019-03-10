@@ -1,7 +1,7 @@
 
 # create placeholders -----------------------------------------------------
 
-models <- c("AR","DI","DICV","DILASSO","LASSO","ENET","gLASSO","ARCV")
+models <- c("AR","DI","DICV","DILASSO","LASSO","ENET","gLASSO")
 msfe <- matrix(NA, nrow=length(models), ncol=length(targetVariables),
                dimnames = list(models, targetVariables)) # listed by horizon, each list model x variable
 MSFEs <- list(h1=msfe, h3=msfe, h12=msfe)
@@ -9,9 +9,6 @@ names(MSFEs) <- names(MSFEs) <- c(paste("h", hChoises, sep=""))
 rm(models, msfe)
 
 ARlags <- list() # listed by variable, each list horizon x window
-
-ARCVlags <- matrix(NA, nrow=length(hChoises), ncol=length(targetVariables),
-                   dimnames = list(c(paste("h=",hChoises,sep="")),targetVariables))
 
 DIlags <- list()
 DIfactor <- matrix(NA, nrow=length(hChoises), ncol=winSize, dimnames=list(c(paste("h=",hChoises,sep="")))) # number of factors
