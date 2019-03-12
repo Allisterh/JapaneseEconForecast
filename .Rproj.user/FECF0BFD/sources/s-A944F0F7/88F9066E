@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1551256528144.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "88F9066E",
+    "lastKnownWriteTime" : 1552370156,
+    "last_content_update" : 1552370156211,
+    "path" : "~/Documents/GitHub/JapaneseEconForecast/interpretations.r",
+    "project_path" : "interpretations.r",
+    "properties" : {
+        "cursorPosition" : "76,22",
+        "scrollLine" : "60"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
