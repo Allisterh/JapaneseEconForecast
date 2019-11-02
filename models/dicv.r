@@ -119,9 +119,21 @@ for (t in 1:winSize){
       Fhat <- DICVfactorList[[horizon]][[t]][,1:optFac]
       fit <- lm(datLag[T1:T2+t,i]~Fhat)
       r2 <- summary(fit)$r.squared
-    }
+    } # endforeach
 }
 if (horizon==3) names(DICVr2[[var]]) <- c("h1", "h3", "h12")
+
+# reshape DICVr2
+DICVr2Long <- lapply(DICVr2, function(x){
+  lapply(x, function(y){
+    data.frame(win=rep(1:60,each=127),
+               var=rep(1:127,times=60),
+               grp=rep(grp, times=60),
+               r2=as.numeric(t(y)))
+  })
+})
+
+
 
 # clear workspace ---------------------------------------------------------
 if (var==1) rm(datLag,eig,N,T,vec,Fhat,x)

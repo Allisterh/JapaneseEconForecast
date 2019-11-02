@@ -1,0 +1,62 @@
+---
+title: "spread"
+author: "yoshiki"
+date: "2019/3/29"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+`df.rds` contains the squared prediction errors for each window (rows) and methodologies(columns).  
+```{r, message=F, warning=F}
+library(tidyverse)
+df <- readRDS("df.rds")
+df
+```
+  
+  
+  
+The MSFEs in absolute terms are
+```{r}
+apply(df[,-1],2,mean) # `-1` to exclude window column
+```
+  
+  
+Next, I plot squared errors against window  
+```{r}
+df %>% 
+  gather(met, err, -win) %>% 
+  ggplot(aes(win,err,colour=met)) +
+  geom_line()
+```
+  
+  
+Sq. Error for `glasso` is too large. Lets just ignore it 
+
+```{r}
+df[,-8] %>% # remove 8th col which corresponds to glasso
+  gather(met,err,-win) %>% 
+  ggplot(aes(win,err,colour=met)) +
+  geom_line()
+```
+  
+  
+We can find some periods (such as win 20-40) show very high prediction error except for DIPC and DIV, whereas prediction errors are not so different among methods in other periods. This may explain the reason why MSFEs are small for DIPC and DICV.  
+
+
+\pagebreak  
+Next, I compare the shape of the time series. For tractability, I compare the shape of spread series with the ones of other three variables: CPI, IP and employment index.  
+```{r, warning=F, message=F}
+library(xts)
+dat <- readRDS("data/dat.rds")
+variables <- c("OutputIncome_IPtotal", "PriceIndicesWages_CPIlessFood", 
+               "InterestRates_spread", "EmploymentHours_EmploymentRegWorkerAll")
+plot.xts(dat[,variables], legend.loc = 7)
+```
+
+  
+Spread series (green) shows very smooth movement while other series have many spikes. Most of the series not included in the figure also show similar spiky movement. 
+
+

@@ -9,16 +9,16 @@ lambdaChoises <- 10^(seq(2,-2,len=100)) # lambda choices (or use the optLam from
 
 alphaChoises <- seq(0.01, 0.99, 0.02)
 predErrEnet <- matrix(NA, nrow=length(lambdaChoises), ncol=winSize)
-X <- lag.xts(dat, 1:4+h-1)
+X <- lag.xts(dat, h)
 
 # cv  ---------------------------------------------------------------------
 
 cvScore <-  # nr-of-lambda x nr-of-alpha matrix containing MSEs for corresponding row and col
   foreach(a = 1:length(alphaChoises), .combine = "cbind", .inorder = F) %dopar% {
     for (t in 1:winSize){
-      fitEnet <- glmnet(X[(4+h):T1+t-1,],y[(4+h):T1+t-1], # (p+h):T1 instead of 1:T1 bc first p obs's are missing
-                                lambda=lambdaChoises, family="gaussian", alpha=alphaChoises[a],
-                                standardize=F, intercept=T, thresh=1e-15, maxit=1e07)
+      fitEnet <- glmnet(X[(1+h):T1+t-1,],y[(1+h):T1+t-1], # (p+h):T1 instead of 1:T1 bc first p obs's are missing
+                        lambda=lambdaChoises, family="gaussian", alpha=alphaChoises[a],
+                        standardize=F, intercept=T, thresh=1e-15, maxit=1e07)
       predEnet <- predict.glmnet(fitEnet, coredata(X[T1+t,]))
       predErrEnet[,t] <- as.numeric((predEnet - as.numeric(y[T1+t]))^2)
     }
@@ -40,8 +40,8 @@ optAlpha <- ENETalpha[horizon, targetVar]
 eval <- 
   foreach(t = 1:winSize) %dopar% { 
     fit <- glmnet(X[(T1+1):T2+t-1,], y[(T1+1):T2+t-1], lambda = optLambda,
-                          family = "gaussian", alpha = optAlpha, standardize = F, intercept=T,
-                          thresh=1e-15, maxit = 1e07)
+                  family = "gaussian", alpha = optAlpha, standardize = F, intercept=T,
+                  thresh=1e-15, maxit = 1e07)
     pred <- predict.glmnet(fit, coredata(X[T2+t,]))
     err <- as.numeric((pred - y[T2+t])^2)
     coefs <- as.numeric(fit$beta)
@@ -59,28 +59,11 @@ coefTracker[coefTracker == 0] <- 0
 coefTracker[coefTracker != 0] <- 1 # 1 if param is selected (non-zero)
 ENETnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # number of non-zero param's
 # Notice that the final object `Enetcoefs` is a list of lists (main list of variables and sub-list of horizons)
-if (horizon == 1) {ENETcoefs[[var]] <- list(); ENETcoefsLong[[var]]<- list()} # initialise by setting sub-list so that each main list contains sub-lists
+if (horizon == 1) {ENETcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
 ENETcoefs[[var]][[horizon]] <- coefTracker
-ENETcoefsLong[[var]][[horizon]] <- data.frame(win=rep(1:60,each=508), 
-                                              lag=rep(1:4, each=127, times=60),
-                                              var=rep(1:127, times=240),
-                                              coef=as.numeric(t(coefTracker)))
-if (horizon == 3) {
-  names(ENETcoefs[[var]]) <- paste("h", hChoises, sep="")
-  names(ENETcoefsLong[[var]]) <- paste("h", hChoises,sep="")
-}
+if (horizon == 3) {names(ENETcoefs[[var]]) <- paste("h", hChoises, sep="")}
 
-MSFEs[[horizon]]["ENET", targetVar] <- msfeEnet
-
-ENETcoefsLong <- lapply(ENETcoefs, function(x){
-  lapply(x, function(y){
-    data.frame(win=rep(1:60,each=508),
-               lag=rep(1:4,each=127,times=60),
-               var=rep(1:127,times=240),
-               grp=rep(grp, times=240), # grp based on variables (lags ignored, note the diff to `glasso.r`)
-               coef=as.numeric(t(y)))
-  })
-}) 
+MSFE1[[horizon]]["ENET", targetVar] <- msfeEnet
 
 rm(coefTracker, X, y, cvScore,alphaChoises, predErrEnet,optLambda,
    msfeEnet, optAlpha, lambdaChoises,eval, opts, predErr)

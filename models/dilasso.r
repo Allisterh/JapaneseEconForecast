@@ -79,6 +79,17 @@ for (t in 1:winSize){
 }
 if (horizon==3) names(DILASSOr2[[var]]) <- c("h1", "h3", "h12")
 
+# reshape dilassor2
+# reshape DICVr2
+DILASSOr2Long <- lapply(DILASSOr2, function(x){
+  lapply(x, function(y){
+    data.frame(win=rep(1:60,each=127),
+               var=rep(1:127,times=60),
+               grp=rep(grp, times=60),
+               r2=as.numeric(t(y)))
+  })
+})
+
 
 # clear workspace
 rm(datLag, bar, coefTracker,cvScore,eval, yLag,i,lambdaChoises, optLam,predErr,t)

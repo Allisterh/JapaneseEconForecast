@@ -9,6 +9,7 @@
 if (var==1){ # Factors are identical for the same horizon 
   datLag <- lag.xts(dat, h) # take h lags so we can forecast h ahead
   DIfactorList[[horizon]] <- list()
+  DIeig[[horizon]] <- matrix(NA, nrow=T2-T1+1, ncol=winSize) # a matrix to store eigenvalues. each col contains eigenvalues for the specific window
   for (t in 1:winSize){
     x <- datLag[T1:T2+t,] # to estimate factor structure
     N <- ncol(x) # number of predictors
@@ -31,6 +32,7 @@ if (var==1){ # Factors are identical for the same horizon
     Fhat <- as.matrix(sqrt(T)*vec[,1:optFac]) %>% #`as.matrix` to provide names in case optFac=1
       set_colnames(paste("F",1:optFac, sep="")) # corresponding factor
     DIfactorList[[horizon]][[t]] <- xts(Fhat, order.by = index(x)) # Store estimated factor so that it can be used later for other varibales w/o the first step
+    DIeig[[horizon]][,t] <- eig$values # store eigenvalues for ER/GR
   } # endfor (rolling)
 } # endif (var==1)
 

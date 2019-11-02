@@ -15,14 +15,14 @@ price <- grep("PriceIndicesWages_", names(dat))
 
 idxList <- list(output, employment, sales, consumption, housing, inventory, stock, exchange, interest, money,price)
 idx <- integer()
-for (i in 1:4){ # four lags
+for (i in 1:1){ # four lags
   for (j in 1:length(idxList)){
     idx <- append(idx, rep(length(idxList)*(i-1)+j, length(idxList[[j]])))
   }
 }
 y <- dat[, targetVar] %>%
   set_colnames("y")
-X <- cbind(intercept=1, lag.xts(dat, 1:4+h-1)) # Need to add intercept manually for grplasso
+X <- cbind(intercept=1, lag.xts(dat, h)) # Need to add intercept manually for grplasso
 
 
 # cross validation --------------------------------------------------------
@@ -31,7 +31,7 @@ lambdaChoises <- 100:1
 
 predErr <-  # 30min
   foreach(t=1:winSize, .combine = "cbind", .inorder = F) %dopar% { # penalty param
-    fitGLasso <- grplasso(X[(4+h):T1+t-1,],y[(4+h):T1+t-1], c(NA,idx), model=LinReg(),
+    fitGLasso <- grplasso(X[(1+h):T1+t-1,],y[(1+h):T1+t-1], c(NA,idx), model=LinReg(),
                           lambda = lambdaChoises, center = F, standardize = F,
                           control = grpl.control(max.iter=1e07, tol=1e-15, trace=0))
     predGLasso <- predict(fitGLasso, newdata=X[T1+t,])
@@ -63,7 +63,7 @@ coefTracker[coefTracker != 0] <- 1 # 1 if param is selected (non-zero)
 
 # save results ------------------------------------------------------------
 
-MSFEs[[horizon]]["gLASSO", targetVar] <- mean(predErr)
+MSFE1[[horizon]]["gLASSO", targetVar] <- mean(predErr)
 gLASSOnonzero[horizon,targetVar] <- sum(coefTracker)/winSize # avg nr of nonzero per window
 
 if (horizon == 1) {gLASSOcoefs[[var]] <- list()} # initialise by setting sub-list so that each main list contains sub-lists
@@ -72,15 +72,6 @@ if (horizon == 3) {
   names(gLASSOcoefs[[var]]) <- paste("h", hChoises, sep="")
 }
 
-gLASSOcoefsLong <- lapply(gLASSOcoefs, function(x){
-  lapply(x, function(y){
-    data.frame(win=rep(1:60,each=508),
-               lag=rep(1:4,each=127,times=60),
-               var=rep(1:127,times=240),
-               grp=rep(grp, times=240), # grp based on variables (lags ignored, note the diff to `glasso.r`)
-               coef=as.numeric(t(y)))
-  })
-})
 # clear workspace ---------------------------------------------------------
 rm(output, employment, sales, consumption, housing, inventory, stock, exchange,
    interest, money,price, idxList, i,j,y,X,idx, lambdaChoises, predErr, cv,

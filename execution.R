@@ -17,25 +17,32 @@ dat <- readRDS("data/dat.rds")
 hChoises <- c(1,3,12) # forecasting horizons
 targetVariables <- scan("txt/targetVariables.txt", character(), quiet=T) # variables to be forecasted
 winSize <- 60 # window size
-source("placeholders.r") # load placeholders to store results
+
+# source("placeholders.r") # load placeholders to store results
+# horizon=1; var=1
+
 
 # model execution ---------------------------------------------------------
 
 tictoc::tic()
 pb<- txtProgressBar(0,length(hChoises)*length(targetVariables), style=3)
 for (horizon in 1:length(hChoises)){
-  h <- hChoises[horizon]
-  T1 <- which(index(dat)=="July 2008") - h # end of initialisation period
-  T2 <- which(index(dat)=="July 2013") - h # end of cv
-  for(var in 1:length(targetVariables)){
+h <- hChoises[horizon]
+T1 <- which(index(dat)=="July 2008") - h # end of initialisation period
+T2 <- which(index(dat)=="July 2013") - h # end of cv
+for(var in 1:length(targetVariables)){
     targetVar <- targetVariables[var]
     # source("models/ar.r") # 7 mins to execute
     # source("models/di.r") # 10 mins
     # source("models/dicv.r") # 3 hrs / 40 min (iMac)
-    source("models/dilasso.r") # 1 hr / 15 mins (iMac)
+    # source("models/dilasso.r") # 1 hr / 15 mins (iMac)
     # source("models/lasso.r") # 1hr / 20 mins (lab)
     # source("models/enet.r") # 3.5-4 hrs (Lab)
     # source("models/glasso.r") # 4 hrs (iMac)
+    # source("models/dier.r")
+    # source("models/digr.r")
+    # source("models/dilag.r")
+    source("models/lassokfcv.r")
     setTxtProgressBar(pb, (horizon-1)*length(targetVariables)+var)
   }
 }
@@ -53,12 +60,15 @@ names(DICVlags) <- varNameShort
 names(DILASSOcoefs) <- varNameShort
 names(DILASSOr2) <- varNameShort
 names(LASSOcoefs) <- varNameShort
+names(LASSOcoefsLong) <- varNameShort
 names(ENETcoefs) <- varNameShort
+names(ENETcoefsLong) <- varNameShort
 names(gLASSOcoefs) <- varNameShort
+names(gLASSOcoefsLong) <- varNameShort
 
 # Standardise MSFE--------------------------------------------------------
-MSFE2 <- lapply(1:3, function(h){
-  t(apply(MSFEs[[h]],1, function(x) x*(1/MSFEs[[h]]["AR",]))) %>% 
+MSFE1_2 <- lapply(1:3, function(h){
+  t(apply(MSFE1[[h]],1, function(x) x*(1/MSFE1[[h]]["AR",]))) %>% 
     set_colnames(varNameShort)
 }) %>% set_names(c("h1","h3","h12"))
 
