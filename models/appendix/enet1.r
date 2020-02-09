@@ -1,3 +1,7 @@
+### VAR(1) to for a strict comparison with our DI model
+### see Section 3.2 for more explantions (paragraph starting with `strictly speaking...`)
+
+
 # elastic net with parameters (lambda and alpha) selected by cv, rolling window (lag=4)
 
 

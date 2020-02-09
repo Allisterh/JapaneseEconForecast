@@ -18,9 +18,7 @@ hChoises <- c(1,3,12) # forecasting horizons
 targetVariables <- scan("txt/targetVariables.txt", character(), quiet=T) # variables to be forecasted
 winSize <- 60 # window size
 
-# source("placeholders.r") # load placeholders to store results
-# horizon=1; var=1
-
+source("placeholders.r") # load placeholders to store results
 
 # model execution ---------------------------------------------------------
 
@@ -30,25 +28,20 @@ for (horizon in 1:length(hChoises)){
 h <- hChoises[horizon]
 T1 <- which(index(dat)=="July 2008") - h # end of initialisation period
 T2 <- which(index(dat)=="July 2013") - h # end of cv
-for(var in 1:length(targetVariables)){
-    targetVar <- targetVariables[var]
-    # source("models/ar.r") # 7 mins to execute
-    # source("models/di.r") # 10 mins
-    # source("models/dicv.r") # 3 hrs / 40 min (iMac)
-    # source("models/dilasso.r") # 1 hr / 15 mins (iMac)
-    # source("models/lasso.r") # 1hr / 20 mins (lab)
-    # source("models/enet.r") # 3.5-4 hrs (Lab)
-    # source("models/glasso.r") # 4 hrs (iMac)
-    # source("models/dier.r")
-    # source("models/digr.r")
-    # source("models/dilag.r")
-    source("models/lassokfcv.r")
-    setTxtProgressBar(pb, (horizon-1)*length(targetVariables)+var)
-  }
+  for(var in 1:length(targetVariables)){
+      targetVar <- targetVariables[var]
+      # source("models/ar.r") 
+      # source("models/di.r") 
+      # source("models/dicv.r") 
+      # source("models/dilasso.r") 
+      # source("models/lasso.r") 
+      # source("models/enet.r") 
+      # source("models/glasso.r")
+      source("models/dier.r")
+      setTxtProgressBar(pb, (horizon-1)*length(targetVariables)+var)
+    }
 }
 tictoc::toc()
-source("saveResults.r")
-
 
 # give names to list  -----------------------------------------------------
 varNameShort <- scan("txt/targetVariablesShort.txt", character(), quiet=T)
@@ -65,6 +58,7 @@ names(ENETcoefs) <- varNameShort
 names(ENETcoefsLong) <- varNameShort
 names(gLASSOcoefs) <- varNameShort
 names(gLASSOcoefsLong) <- varNameShort
+names(DIERlags) <- varNameShort
 
 # Standardise MSFE--------------------------------------------------------
 MSFE1_2 <- lapply(1:3, function(h){

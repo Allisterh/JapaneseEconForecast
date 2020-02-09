@@ -1,3 +1,10 @@
+########################################################################
+### This file examines the forecasting performances of DI model with lagged factors 
+### and no lags of the target variable to address reviewer's suggestion. 
+###The result appears to show that including lagged factors cause 
+### overfitting, hence omitted from the final manuscript
+########################################################################
+
 
 # Initial Setting (Number of factors and lags) ----------------------------
 NrFactor <- 4

@@ -1,4 +1,6 @@
-# # lasso with regularisation parameter selected by cv, rolling window. Lag = 4
+### VAR(1) to for a strict comparison with our DI model
+### see Section 3.2 for more explantions (paragraph starting with `strictly speaking...`)
+# # lasso with regularisation parameter selected by cv, rolling window.
 # 
 # # cross validation (b/w period T1 n T2)
 y <- dat[, targetVar] %>%

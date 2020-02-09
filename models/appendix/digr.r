@@ -1,3 +1,13 @@
+##################################################################
+### We have also implemented growth ratio estimator to select the number of
+### factors in the diffusion index model (Ahn and Horestein, 2013). 
+### We omit the result from the manuscript because the result is quite similar 
+### to Eigenvalue Ratio estimator, which is reported in our paper.
+##################################################################
+
+# Eigenvalue ration method (Ahn and Horestein, 2013)
+# We use eigenvalues stored in calculation for DIBN ("models/di.r")
+
 DIeig <- readRDS("results/DI/DIeig.rds") # import results from DIBN. `DIeig.r` contains eigenvalues of XX'/(NT)
 DIfactorList <- readRDS("results/DI/DIfactorList.rds")
 

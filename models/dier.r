@@ -50,9 +50,6 @@ MSFEs[[horizon]]["DIER", targetVar] <- mean(predErr)
 # clear workspace
 rm(y,eval, predErr)
 
-#saveRDS(DIERlags, "results/DIER/DIERlags.rds")
-#saveRDS(DIERfactor,"results/DIER/DIERfactor.rds")
-#saveRDS(er,"results/DIER/er.rds")
-# MSFEs$h1 <- rbind(MSFEs$h1, "DIER"=NA)
-# MSFEs$h3 <- rbind(MSFEs$h3, "DIER"=NA)
-# MSFEs$h12 <- rbind(MSFEs$h12, "DIER"=NA)
+saveRDS(DIERlags, "results/DIER/DIERlags.rds")
+saveRDS(DIERfactor,"results/DIER/DIERfactor.rds")
+saveRDS(er,"results/DIER/er.rds")

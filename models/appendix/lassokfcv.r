@@ -1,3 +1,13 @@
+########################################################################
+### This file examines the forecasting performances of the lasso in which
+### standard k-fold cross varidation is used to choose the regularisation 
+### parameter (lambda) instead of rolling window scheme to address reviewer's suggestion. 
+### The result is not included in the manuscript since it shows no significant improvement 
+### and the authors think that k-fold cross varidation may not be appropriate since it is 
+### subjected to data leakage, i.e. the model utilises the information unavailable at the time it makes a prediction 
+### (for instance, using data from 2017 and 2019 as a training set to predict 2018 is unappropriate)
+########################################################################
+
 
 # k-fold cross validation (time series structure ignored) -----------------
 k = 10 # nr of cross validation
