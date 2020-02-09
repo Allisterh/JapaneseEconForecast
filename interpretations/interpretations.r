@@ -1,6 +1,3 @@
-source("readResults.R")
-
-
 # DI-based methods----------------------------------------------------------
 
 ## Recall that we estimate factors for each window, i.e. interpretations may differ for different windows,

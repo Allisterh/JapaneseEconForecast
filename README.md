@@ -23,4 +23,5 @@ Folders are organised as follows.
 
 * `placeholders.r`: Placeholders filled later in the implementation. Put in a different file so that `execution.r` remains neat.  
 * `results`: Contains results. `MSFE` contains MSFE in the absolute term (`MSFEs.rds`) and in the relative term (`MSFE2.rds`). See also the explanations for `models` above.   
-* `txt`: Text files containing the names of target variables to facilitate codes to be tidy.      
+* `txt`: Text files containing the names of target variables to facilitate codes to be tidy.  
+* `interpretations`: Contains files used for interpretting the results. Used mainly for creating Fig 1, Fig 2, Table 5, and Table 6. 
