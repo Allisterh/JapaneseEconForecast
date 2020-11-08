@@ -1,4 +1,4 @@
-# Master Thesis
+# Forecasting Japanese Macroeconomy Using High-Dimensional Data
 Replication material for my master thesis, "Forecasting Japanese Macroeconomy Using High-Dimensional Data"  
 
 Folders are organised as follows.  
