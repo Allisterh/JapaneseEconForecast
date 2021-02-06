@@ -1,5 +1,5 @@
 # Forecasting Japanese Macroeconomy Using High-Dimensional Data
-Replication material for the JER paper, ["Forecasting Japanese Macroeconomy Using High-Dimensional Data"](https://link.springer.com/article/10.1007/s42973-020-00041-z)  
+Replication material for the JER paper, ["Forecasting the Japanese macroeconomy using high-dimensional data"](https://link.springer.com/article/10.1007/s42973-020-00041-z)  
 
 Folders are organised as follows.  
 * `data` contains dataset, transformation codes, and their descriptions. (`dat.rds` is what you get in the end)  
