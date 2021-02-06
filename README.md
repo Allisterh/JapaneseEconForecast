@@ -1,9 +1,9 @@
 # Forecasting Japanese Macroeconomy Using High-Dimensional Data
-Replication material for my master thesis, "Forecasting Japanese Macroeconomy Using High-Dimensional Data"  
+Replication material for the JER paper, ["Forecasting Japanese Macroeconomy Using High-Dimensional Data"](https://link.springer.com/article/10.1007/s42973-020-00041-z)  
 
 Folders are organised as follows.  
-* `data` contains dataset, trandformation codes, and their descriptions. (`dat.rds` is what you get in the end)  
-    * `dat`: Folders containing data before transformation. Filenames correspind to the sources or variable names (see `datDetail.xlsx`) . Only publicly available sources are uploaded (Datastream and NEEDS upon request). Abbreviations are: BOJ = Bank of Japan, METI = Ministery of Economy, Trade and Industry, MHLW = Ministry of Health, Labour and Welfare, MIC = Ministry of Internal Affairs and Communication, MLIT = Ministry of Land, Infrastructure, Transport and Tourism. 
+* `data` contains dataset, transformation codes, and their descriptions. (`dat.rds` is what you get in the end)  
+    * `dat`: Folders containing data before transformation. Filenames correspind to the sources or variable names (see `datDetail.xlsx`) . Only publicly available sources are uploaded (Datastream and NEEDS require subscription, hence only available for the transformed series). Abbreviations are: BOJ = Bank of Japan, METI = Ministery of Economy, Trade and Industry, MHLW = Ministry of Health, Labour and Welfare, MIC = Ministry of Internal Affairs and Communication, MLIT = Ministry of Land, Infrastructure, Transport and Tourism. 
     * `prep`: Folders containing data preprocessing codes. Filenames correspond to the sources.  
     * `rds`: Folders containing preprocessed data from `prep`. Stored in RDS format.  
     * `dat.r`: puts the preprocessed data together for the analysis. Seasonal adjustments, unit root tests and data transformations are also done here.
